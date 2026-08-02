@@ -1,0 +1,71 @@
+---
+name: japanese_custom
+version: "1.0"
+sort: original
+...
+
+# 日文多拼补充词库
+# ち 系列
+ち	ti
+ちぇ	tie
+ちゃ	tya
+ちゅ	tyu
+ちょ	tyo
+
+# つ 系列
+つ	tu
+
+# し 系列
+し	si
+しゃ	sya
+しゅ	syu
+しょ	syo
+
+# ふ 系列
+ふ	hu
+
+# じ 系列
+じ	zi
+じゃ	zya
+じゅ	zyu
+じょ	zyo
+
+# りゃりゅりょ 系列（可选）
+りゃ	rya
+りゅ	ryu
+りょ	ryo
+
+# にゃにゅにょ 系列（可选）
+にゃ	nya
+にゅ	nyu
+にょ	nyo
+
+# ぴゃぴゅぴょ 系列（可选）
+ぴゃ	pya
+ぴゅ	pyu
+ぴょ	pyo
+
+# びゃびゅびょ 系列（可选）
+びゃ	bya
+びゅ	byu
+びょ	byo
+
+# みゃみゅみょ 系列（可选）
+みゃ	mya
+みゅ	myu
+みょ	myo
+
+# ぎゃぎゅぎょ 系列（可选）
+ぎゃ	gya
+ぎゅ	gyu
+ぎょ	gyo
+
+# きゃきゅきょ 系列（可选）
+きゃ	kya
+きゅ	kyu
+きょ	kyo
+
+# ひゃひゅひょ 系列（可选）
+ひゃ	hya
+ひゅ	hyu
+ひょ	hyo

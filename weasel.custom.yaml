@@ -1,0 +1,25 @@
+customization:
+  distribution_code_name: Weasel
+  distribution_version: 0.17.4
+  generator: "Weasel::UIStyleSettings"
+  modified_time: "Sat Jul 18 18:55:41 2026"
+  rime_version: 1.13.1
+patch:
+  "style/color_scheme": android
+  "style/display_tray_icon": true
+  "style/horizontal": true
+  "style/inline_preedit": false
+  "style/layout/border": 0
+  "style/layout/border_width": 0
+  "style/layout/candidate_spacing": 16
+  "style/layout/hilite_padding": 8
+  "style/layout/hilite_spacing": 4
+  "style/layout/margin_x": 8
+  "style/layout/margin_y": 8
+  "style/layout/max_height": 600
+  "style/comment_below": true
+  "style/layout/max_width": 0
+  "style/layout/min_height": 0
+  "style/layout/min_width": 0
+  "style/layout/round_corner": 4
+  "style/layout/spacing": 8

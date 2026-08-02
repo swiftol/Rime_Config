@@ -1,0 +1,90 @@
+# Rime schema settings
+# encoding: utf-8
+# Copyright (C) Mirtle <mirtle.cn@outlook.com>
+# License: CC BY-SA 4.0 DEED (https://creativecommons.org/licenses/by-sa/4.0/)
+
+schema:
+  schema_id: radical_pinyin_flypy
+  name: "偏旁部件拆字(小鹤)"
+  version: "1.02"
+  author: Mirtle
+  description: |
+    用拼音按顺序拼出偏旁部件，以输入汉字。
+    码表：開放詞典 / henrysting / Mirtle
+    注音、校对、方案：Mirtle
+    报错：<https://github.com/mirtlecn/rime_radical_pinyin>
+
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - echo_translator
+    - punct_translator
+    - table_translator
+
+speller:
+  alphabet: "abcdefghijklmnopqrstuvwxyz;"
+  delimiter: " '"
+  algebra:
+    - derive/^([jqxy])u(?=^|$|')/$1v/
+    - derive/'([jqxy])u(?=^|$|')/'$1v/
+    - derive/^([aoe])([ioun])(?=^|$|')/$1$1$2/
+    - derive/'([aoe])([ioun])(?=^|$|')/'$1$1$2/
+    - xform/^([aoe])(ng)?(?=^|$|')/$1$1$2/
+    - xform/'([aoe])(ng)?(?=^|$|')/'$1$1$2/
+    - xform/iu(?=^|$|')/<q>/
+    - xform/(.)ei(?=^|$|')/$1<w>/
+    - xform/uan(?=^|$|')/<r>/
+    - xform/[uv]e(?=^|$|')/<t>/
+    - xform/un(?=^|$|')/<y>/
+    - xform/^sh/<u>/
+    - xform/^ch/<i>/
+    - xform/^zh/<v>/
+    - xform/'sh/'<u>/
+    - xform/'ch/'<i>/
+    - xform/'zh/'<v>/
+    - xform/uo(?=^|$|')/<o>/
+    - xform/ie(?=^|$|')/<p>/
+    - xform/([a-z>])i?ong(?=^|$|')/$1<s>/
+    - xform/ing(?=^|$|')|uai(?=^|$|')/<k>/
+    - xform/([a-z>])ai(?=^|$|')/$1<d>/
+    - xform/([a-z>])en(?=^|$|')/$1<f>/
+    - xform/([a-z>])eng(?=^|$|')/$1<g>/
+    - xform/[iu]ang(?=^|$|')/<l>/
+    - xform/([a-z>])ang(?=^|$|')/$1<h>/
+    - xform/ian(?=^|$|')/<m>/
+    - xform/([a-z>])an(?=^|$|')/$1<j>/
+    - xform/([a-z>])ou(?=^|$|')/$1<z>/
+    - xform/[iu]a(?=^|$|')/<x>/
+    - xform/iao(?=^|$|')/<n>/
+    - xform/([a-z>])ao(?=^|$|')/$1<c>/
+    - xform/ui(?=^|$|')/<v>/
+    - xform/in(?=^|$|')/<b>/
+    - xform/'|<|>//
+
+translator:
+  dictionary: radical_pinyin
+  enable_user_dict: false
+  prism: flypy_radical_pinyin
+
+punctuator:
+  import_preset: default
+
+key_binder:
+  import_preset: default
+
+recognizer:
+  import_preset: default

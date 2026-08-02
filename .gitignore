@@ -1,0 +1,60 @@
+# Build artifacts
+build/
+*.table.bin
+*.prism.bin
+*.reverse.bin
+*.schema.yaml.bak
+
+# User data
+*.userdb/
+user.yaml
+installation.yaml
+sync/
+
+# Logs and debug files
+*.log
+translation_build_verify.txt
+translation_debug.txt
+translation_load_verify.txt
+translation_runtime.txt
+build_debug.txt
+trans_detail.log
+all_entries.log
+
+# Translation backup/intermediate files
+cn_dicts/translations.dict.yaml.backup
+cn_dicts/translations.dict.yaml.backup2
+cn_dicts/translations.dict.yaml.vertical_backup
+cn_dicts/translations.dict_*.yaml
+cn_dicts/translations_backup.dict.yaml
+cn_dicts/translations_merged.dict.yaml
+
+# Large archives
+*.zip
+rime-frost-temp/
+
+# Old/backup schemas
+rime_ice_japanese_v3.schema.yaml
+rime_ice_v3.dict.yaml
+rime_ice_backup_v1.schema.yaml
+rime_ice_backup_v1.dict.yaml
+rime_ice_trilingual.schema.yaml
+rime_ice_trilingual.dict.yaml
+trilingual_mix.schema.yaml
+trilingual_mix.dict.yaml
+
+# Test files
+test_trans.dict.yaml
+test_trans.schema.yaml
+test_translation.dict.yaml
+test_translation.schema.yaml
+trilingual_mix.txt
+
+# Build/dev scripts (not needed on new machine)
+batch_remove_tones.py
+generate_abbrev.py
+remove_tones.py
+
+# OS
+.DS_Store
+Thumbs.db

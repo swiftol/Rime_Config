@@ -1,0 +1,13 @@
+---
+name: rime_mint_notone
+version: "2025.07.06"
+sort: by_weight
+use_preset_vocabulary: false
+import_tables:
+  - dicts/high_freq_chars
+  - dicts/base
+  - dicts/ext
+  - dicts/tencent
+  - dicts/rime_mint.chars_notone
+  - dicts/rime_mint.base_notone
+...

@@ -1,0 +1,45 @@
+# japanese_variants.dict.yaml
+# 日文非标准罗马字拼法补充词库
+# encoding: utf-8
+
+---
+name: japanese_variants
+version: "1.0"
+sort: original
+...
+
+# 常用词的非标准拼法（sya/syu/syo 等）
+放射	housya
+写真	syasin
+社会	syakai
+社長	syatyou
+車	syarsha
+宿題	syukudai
+主人	syujin
+出張	syuttyou
+小説	syousestu
+消費	syouhi
+症状	syoujou
+勝負	syoubu
+正直	syoujiki
+紹介	syoukai
+昭和	syouwa
+
+# cha/chu/cho 的 tya/tyu/tyo 拼法
+茶	tya
+注意	tyuui
+注文	tyuumon
+中国	tyuugoku
+調子	tyousi
+朝	tyou
+直接	tyokusestu
+
+# ja/ju/jo 的 zya/zyu/zyo 拼法
+時間	zyikan
+自由	zyiyuu
+自分	zyibun
+授業	zyugyou
+重要	zyuuyou
+女性	zyosei
+情報	zyouhou
+上手	zyouzu
