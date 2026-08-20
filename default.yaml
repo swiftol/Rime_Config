@@ -14,6 +14,7 @@ schema_list:
   - schema: test_translation     # 翻译测试
   - schema: rime_ice_japanese_v3 # 雾凇拼音·中日 3.0（备份）
   - schema: rime_ice_japanese_v4 # 雾凇拼音·中日 4.0（备份）
+  - schema: rime_ice_japanese_v5 # 雾凇拼音·中日 5.0（备份）
   - schema: rime_ice_backup_v1   # 雾凇中日1.0(备份)
   - schema: rime_mint            # 薄荷拼音
   - schema: double_pinyin_flypy  # 小鹤双拼
@@ -41,6 +42,8 @@ switcher:
     # - F4
   # 在切换方案时保留的选项
   save_options:
+    - show_english_annotation
+    - show_japanese_annotation
     - full_shape  # 保留全角模式
     - ascii_punct # 保留西文模式
     - transcription     # 保留汉字简繁体选项

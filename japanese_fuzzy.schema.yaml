@@ -1,0 +1,95 @@
+schema:
+  schema_id: japanese_fuzzy
+  name: Japanese fuzzy prism
+  version: "1.0"
+
+engine:
+  processors: [speller]
+  segmentors: [abc_segmentor]
+  translators: [script_translator]
+
+speller:
+  alphabet: "zyxwvutsrqponmlkjihgfedcba-_"
+  delimiter: " '"
+  algebra:
+    - derive/^si$/shi/
+    - derive/^shi$/si/
+    - derive/^hu$/fu/
+    - derive/^fu$/hu/
+    # Accept hu/fu anywhere in a reading (e.g. serihu -> serifu -> セリフ).
+    - derive/fu/hu/
+    - derive/hu/fu/
+    # ち/じ and their contracted sounds: shachou -> shajou.
+    - derive/cha/ja/
+    - derive/ja/cha/
+    - derive/chu/ju/
+    - derive/ju/chu/
+    - derive/cho/jo/
+    - derive/jo/cho/
+    # Allow the commonly confused contracted vowels ちょ / ちゅ.
+    - derive/cho/chu/
+    - derive/chu/cho/
+    # Allow the commonly confused contracted vowels しょ / しゅ.
+    - derive/sho/shu/
+    - derive/shu/sho/
+    - derive/chi/ji/
+    - derive/ji/chi/
+    - derive/tya/dya/
+    - derive/dya/tya/
+    - derive/tyu/dyu/
+    - derive/dyu/tyu/
+    - derive/tyo/dyo/
+    - derive/dyo/tyo/
+    - derive/ti/di/
+    - derive/di/ti/
+    # Small tsu: kitte -> kite, gakkou -> gakou.
+    - derive/bb/b/
+    - derive/cc/c/
+    - derive/dd/d/
+    - derive/ff/f/
+    - derive/gg/g/
+    - derive/hh/h/
+    - derive/jj/j/
+    - derive/kk/k/
+    - derive/ll/l/
+    - derive/mm/m/
+    - derive/pp/p/
+    - derive/qq/q/
+    - derive/rr/r/
+    - derive/ss/s/
+    - derive/tt/t/
+    - derive/vv/v/
+    - derive/ww/w/
+    - derive/xx/x/
+    - derive/yy/y/
+    - derive/zz/z/
+    # Long-vowel mark and common romanized long vowels may be omitted.
+    - derive/-//
+    - derive/aa/a/
+    - derive/ii/i/
+    - derive/uu/u/
+    - derive/ee/e/
+    - derive/oo/o/
+    - derive/ou/o/
+    # Japanese e-row long vowel: reigi -> regi, keitai -> ketai.
+    - derive/ei/e/
+    # せい / さい vowel confusion.
+    - derive/sei/sai/
+    - derive/sai/sei/
+    # Contract -kae- / -gae- to the commonly mistyped -ke- / -ge-.
+    # Example: kigaeru -> kigeru; dakuten fuzzy may then accept kikeru.
+    - derive/kae/ke/
+    - derive/gae/ge/
+    # Dakuten fuzzy pair requested by the user.
+    - derive/t/d/
+    - derive/d/t/
+    # Common unvoiced/voiced and semi-voiced substitutions.  These rules are
+    # intentionally general, so shuppatsu can be found from shubatsu without
+    # hard-coding 出発.
+
+translator:
+  dictionary: japanese
+  prism: japanese_fuzzy
+  enable_sentence: false
+  enable_user_dict: false
+  spelling_hints: 0

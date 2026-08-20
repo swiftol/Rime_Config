@@ -1,7 +1,13 @@
 @echo off
 echo === Manual Deploy ===
-cd /d "C:\Users\86131\AppData\Roaming\Rime"
-"D:\Rime\weasel-0.17.4\rime_dict_manager.exe" -b . test_translation
+cd /d "%APPDATA%\Rime"
+set "RIME_DICT_MANAGER=%ProgramFiles%\Rime\weasel\rime_dict_manager.exe"
+if not exist "%RIME_DICT_MANAGER%" (
+    echo [FAIL] Please set RIME_DICT_MANAGER to your rime_dict_manager.exe path.
+    pause
+    exit /b 1
+)
+"%RIME_DICT_MANAGER%" -b . test_translation
 echo.
 echo === Check Results ===
 if exist "build\test_translation.table.bin" (

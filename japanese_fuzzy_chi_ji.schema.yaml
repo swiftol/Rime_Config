@@ -1,0 +1,22 @@
+schema:
+  schema_id: japanese_fuzzy_chi_ji
+  name: Japanese fuzzy - chi ji
+  version: "1.0"
+engine:
+  processors: [speller]
+  segmentors: [abc_segmentor]
+  translators: [script_translator]
+speller:
+  alphabet: "zyxwvutsrqponmlkjihgfedcba-_"
+  delimiter: " '"
+  algebra:
+    - derive/chi/ji/
+    - derive/ji/chi/
+    - derive/ti/di/
+    - derive/di/ti/
+translator:
+  dictionary: japanese
+  prism: japanese_fuzzy_chi_ji
+  enable_sentence: false
+  enable_user_dict: false
+  spelling_hints: 0

@@ -1,0 +1,20 @@
+schema:
+  schema_id: japanese_fuzzy_long_i
+  name: Japanese fuzzy - long i
+  version: "1.0"
+engine:
+  processors: [speller]
+  segmentors: [abc_segmentor]
+  translators: [script_translator]
+speller:
+  alphabet: "zyxwvutsrqponmlkjihgfedcba-_"
+  delimiter: " '"
+  algebra:
+    - derive/ii/i/
+    - derive/ei/e/
+translator:
+  dictionary: japanese
+  prism: japanese_fuzzy_long_i
+  enable_sentence: false
+  enable_user_dict: false
+  spelling_hints: 0

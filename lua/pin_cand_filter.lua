@@ -62,6 +62,21 @@ local M = {}
 function M.init(env)
     env.name_space = env.name_space:gsub("^*", "")
 
+    -- Common phrases use a separate mapping because they keep the ordinary
+    -- first candidate and are inserted immediately after it.
+    env.common_phrase_pins = {}
+    local common_list = env.engine.schema.config:get_list("common_phrase_pin")
+    if common_list then
+        for i = 0, common_list.size - 1 do
+            local preedit, text = common_list:get_value_at(i).value:match("([^\t]+)\t(.+)")
+            if preedit and text then
+                local code = preedit:gsub(" ", "")
+                env.common_phrase_pins[code] = env.common_phrase_pins[code] or {}
+                table.insert(env.common_phrase_pins[code], text)
+            end
+        end
+    end
+
     if env.pin_cands ~= nil then return end
 
     local list = env.engine.schema.config:get_list(env.name_space)
@@ -156,6 +171,31 @@ function M.func(input, env)
     local full_preedit = env.engine.context:get_preedit().text
     -- 非汉字部分的 preedit，如 shij
     local letter_only_preedit = string.gsub(full_preedit, "[^a-zA-Z]", "")
+
+    local common_texts = env.common_phrase_pins and env.common_phrase_pins[letter_only_preedit]
+    if common_texts and #common_texts > 0 then
+        local matched, others = {}, {}
+        local matched_count = 0
+        for cand in input:iter() do
+            local idx = find_index(common_texts, cand.text)
+            if idx ~= 0 and not matched[idx] then
+                matched[idx] = cand
+                matched_count = matched_count + 1
+            else
+                table.insert(others, cand)
+            end
+            if matched_count == #common_texts or #others > 100 then break end
+        end
+
+        -- WeChat-like order: ordinary candidate 1, then configured phrases.
+        if #others > 0 then yield(others[1]) end
+        for i = 1, #common_texts do
+            if matched[i] then yield(matched[i]) end
+        end
+        for i = 2, #others do yield(others[i]) end
+        for cand in input:iter() do yield(cand) end
+        return
+    end
 
     if env.pin_cands == nil or next(env.pin_cands) == nil or #letter_only_preedit == 0 then
         for cand in input:iter() do yield(cand) end

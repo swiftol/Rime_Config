@@ -1,5 +1,13 @@
 # 雾凇拼音
 
+> 本仓库是 **雾凇拼音·中日**：在雾凇拼音基础上加入中文/日语直接混输、英日翻译注释、日语模糊匹配、展开式候选窗和图形化设置面板。Windows 用户可在 [Releases](https://github.com/swiftol/Rime_Config/releases) 下载一键安装 EXE，安装后即可使用。
+
+## 隐私说明
+
+输入法核心功能完全离线。仓库和安装包只包含公共词库与默认配置，不包含开发者或用户的选词学习记录、个人常用语、剪贴板历史、同步资料、日志或其他输入习惯。安装到已有小狼毫的电脑时，会先备份原用户目录，并保留目标电脑自己的个人数据。
+
+修改版小狼毫界面与 TSF 源码位于 [swiftol/weasel](https://github.com/swiftol/weasel)。设置面板源码位于 [`src/RimeSettings`](./src/RimeSettings)，安装器源码位于 [`installer`](./installer)。
+
 ![demo](./others/asserts/overview.png)
 
 **雾凇拼音**是一份开箱即用的简体中文 Rime 输入法配置，词库长期维护，基本功能齐全，使用完全离线，质量稳定可靠。

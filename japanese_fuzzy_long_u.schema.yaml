@@ -1,0 +1,20 @@
+schema:
+  schema_id: japanese_fuzzy_long_u
+  name: Japanese fuzzy - long u
+  version: "1.0"
+engine:
+  processors: [speller]
+  segmentors: [abc_segmentor]
+  translators: [script_translator]
+speller:
+  alphabet: "zyxwvutsrqponmlkjihgfedcba-_"
+  delimiter: " '"
+  algebra:
+    - derive/uu/u/
+    - derive/ou/o/
+translator:
+  dictionary: japanese
+  prism: japanese_fuzzy_long_u
+  enable_sentence: false
+  enable_user_dict: false
+  spelling_hints: 0

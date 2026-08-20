@@ -1,0 +1,38 @@
+schema:
+  schema_id: japanese_fuzzy_sokuon
+  name: Japanese fuzzy - sokuon
+  version: "1.0"
+engine:
+  processors: [speller]
+  segmentors: [abc_segmentor]
+  translators: [script_translator]
+speller:
+  alphabet: "zyxwvutsrqponmlkjihgfedcba-_"
+  delimiter: " '"
+  algebra:
+    - derive/bb/b/
+    - derive/cc/c/
+    - derive/dd/d/
+    - derive/ff/f/
+    - derive/gg/g/
+    - derive/hh/h/
+    - derive/jj/j/
+    - derive/kk/k/
+    - derive/ll/l/
+    - derive/mm/m/
+    - derive/pp/p/
+    - derive/qq/q/
+    - derive/rr/r/
+    - derive/ss/s/
+    - derive/tt/t/
+    - derive/vv/v/
+    - derive/ww/w/
+    - derive/xx/x/
+    - derive/yy/y/
+    - derive/zz/z/
+translator:
+  dictionary: japanese
+  prism: japanese_fuzzy_sokuon
+  enable_sentence: false
+  enable_user_dict: false
+  spelling_hints: 0

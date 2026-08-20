@@ -7,9 +7,21 @@ build/
 
 # User data
 *.userdb/
+*.userdb/**
+*.userdb.txt
+*.userdb.kct
 user.yaml
 installation.yaml
 sync/
+clipboard/
+custom_phrase.txt
+lua/common_phrase_data.lua
+
+# Local backups and generated personal-state snapshots
+*.bak
+*.backup
+*.backup2
+*.before_*
 
 # Logs and debug files
 *.log

@@ -8,6 +8,12 @@ version: "1.0"
 sort: original
 ...
 
+# 长音符号的常用罗马字输入（重复元音）
+コピー	kopii
+
+# 常用完整表达
+不安です	fuandesu
+
 # 常用词的非标准拼法（sya/syu/syo 等）
 放射	housya
 写真	syasin

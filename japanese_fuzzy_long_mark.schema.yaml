@@ -1,0 +1,19 @@
+schema:
+  schema_id: japanese_fuzzy_long_mark
+  name: Japanese fuzzy - long mark
+  version: "1.0"
+engine:
+  processors: [speller]
+  segmentors: [abc_segmentor]
+  translators: [script_translator]
+speller:
+  alphabet: "zyxwvutsrqponmlkjihgfedcba-_"
+  delimiter: " '"
+  algebra:
+    - derive/-//
+translator:
+  dictionary: japanese
+  prism: japanese_fuzzy_long_mark
+  enable_sentence: false
+  enable_user_dict: false
+  spelling_hints: 0

@@ -5,13 +5,13 @@ customization:
   modified_time: "Tue Jul 21 15:20:15 2026"
   rime_version: 1.13.1
 patch:
-  "menu/page_size": 9
+  # 全局提供足够候选，供定制候选窗按 6 列逐行滚动。
+  # 未自行指定 page_size 的第三方方案会自动继承此值。
+  "menu/page_size": 100
   schema_list:
-    - {schema: rime_ice_backup_v1}
     - {schema: rime_ice_japanese}
-    - {schema: rime_ice_trilingual}
-    - {schema: rime_ice_japanese_v3}
     - {schema: rime_ice_japanese_v4}
+    - {schema: rime_ice_japanese_v5}
   switcher:
     caption: "〔方案選單〕"
     hotkeys: ["Control+grave", F4]

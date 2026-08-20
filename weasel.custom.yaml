@@ -6,6 +6,12 @@ customization:
   rime_version: 1.13.1
 patch:
   "style/color_scheme": android
+  # Per-language candidate colors (ABGR). Text defaults to Chinese white and
+  # Japanese teal; transparent backgrounds continue to use the theme panel.
+  "preset_color_schemes/android/chinese_candidate_text_color": 0xFFF2F2F2
+  "preset_color_schemes/android/chinese_candidate_back_color": 0x00000000
+  "preset_color_schemes/android/japanese_candidate_text_color": 0xFFC4CB80
+  "preset_color_schemes/android/japanese_candidate_back_color": 0x00000000
   "style/display_tray_icon": true
   "style/horizontal": true
   "style/inline_preedit": false
@@ -18,8 +24,11 @@ patch:
   "style/layout/margin_y": 8
   "style/layout/max_height": 600
   "style/comment_below": true
+  "style/comment_font_point": 11
   "style/layout/max_width": 0
   "style/layout/min_height": 0
-  "style/layout/min_width": 0
+  "style/layout/min_width": 600
+  # 横向候选框固定为 600；超过上限时前端自动少显示候选。
+  "style/layout/min_width": 600
   "style/layout/round_corner": 4
   "style/layout/spacing": 8

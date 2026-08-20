@@ -3,9 +3,9 @@
 
 # 雾凇拼音 + 日文混输方案
 schema:
-  schema_id: rime_ice_japanese
-  name: 雾凇拼音·中日
-  version: "1.6"
+  schema_id: rime_ice_japanese_v5
+  name: 雾凇拼音·中日 5.0（备份）
+  version: "5.0"
   author:
     - Dvel (雾凇拼音)
     - Kiro AI (中日混输)
@@ -16,12 +16,7 @@ schema:
     - melt_eng
     - radical_pinyin
     - japanese
-    - japanese_fuzzy_sokuon
-    - japanese_fuzzy_long_i
-    - japanese_fuzzy_long_u
-    - japanese_fuzzy_long_mark
-    - japanese_fuzzy_chi_ji
-    - japanese_fuzzy_dakuten
+    - japanese_fuzzy
 
 # 开关
 switches:
@@ -37,41 +32,19 @@ switches:
   - name: full_shape
     states: [ 半角, 全角 ]
   - name: show_english_annotation
-    states: [ 英关, 英注 ]
+    states: [ 英注, 英关 ]
   - name: show_japanese_annotation
-    states: [ 日关, 日注 ]
+    states: [ 日注, 日关 ]
 
 # 输入引擎
   - name: japanese_fuzzy_match
     states: [ JP-exact, JP-fuzzy ]
-    reset: 0
-  - name: japanese_fuzzy_sokuon
-    states: [ 促音关, 促音开 ]
-  - name: japanese_fuzzy_long_i
-    states: [ 长い关, 长い开 ]
-  - name: japanese_fuzzy_long_u
-    states: [ 长う关, 长う开 ]
-  - name: japanese_fuzzy_long_mark
-    states: [ 长ー关, 长ー开 ]
-  - name: japanese_fuzzy_chi_ji
-    states: [ ちじ关, ちじ开 ]
-  - name: japanese_fuzzy_hu_fu
-    states: [ hufu关, hufu开 ]
-  - name: japanese_fuzzy_shu_sho
-    states: [ shusho关, shusho开 ]
-  - name: japanese_fuzzy_dakuten
-    states: [ 浊音关, 浊音开 ]
-  - name: japanese_fuzzy_sei_sai
-    states: [ seisai关, seisai开 ]
-    reset: 1
   - name: sentence_translation
     states: [ 句译关, 句译开 ]
-    reset: 0
 
 engine:
   processors:
     - lua_processor@space_commit_raw_processor  # 空格上屏+空格（必须放在最前面）
-    - lua_processor@*japanese_fuzzy_learning_processor
     - lua_processor@*select_character
     - ascii_composer
     - recognizer
@@ -89,16 +62,10 @@ engine:
     - punct_segmentor
     - fallback_segmentor
   translators:
-    # 常用语先于普通中日词库产生候选，避免 aa 等冲突编码被挤到后页。
     - punct_translator
-    - script_translator@chinese_exact_translator
-    - script_translator@japanese_translator  # 日文精确匹配
-    - lua_translator@*japanese_prefix_translator  # 至少 3 字母的日文前缀联想
-    # All fuzzy rules share one prism lookup.  The Lua filter below applies
-    # the master/child switches.  Five independent 48-57 MB lookups here
-    # made every keystroke and Backspace rebuild the candidate list slowly.
-    - lua_translator@*japanese_fuzzy_translator
-    - script_translator              # 中文拼接、整句和预测候选
+    - script_translator              # 中文拼音
+    - script_translator@japanese_translator  # 日文
+    - script_translator@japanese_fuzzy_translator
     - lua_translator@*date_translator
     - lua_translator@*lunar
     - lua_translator@*uuid
@@ -109,6 +76,7 @@ engine:
     - lua_translator@*unicode
     - lua_translator@*number_translator
     - lua_translator@*calc_translator
+    - lua_translator@*force_gc
   filters:
     - lua_filter@*corrector
     - reverse_lookup_filter@radical_reverse_lookup
@@ -120,11 +88,8 @@ engine:
     - simplifier@emoji
     - simplifier@traditionalize
     - lua_filter@*search@radical_pinyin
-    - lua_filter@*rare_single_char_filter
-    - lua_filter@translation_annotation_filter
-    # Ordering must be last: earlier ranking filters otherwise undo the
-    # exact/fuzzy/assembled buckets produced here.
-    - lua_filter@japanese_fuzzy_filter
+    - lua_filter@*translation_annotation_filter
+    - lua_filter@*japanese_fuzzy_filter
     - uniquifier
 
 # Lua 配置（继承雾凇拼音）
@@ -171,10 +136,6 @@ reduce_english_filter:
     zach
   ]
 
-rare_single_char_filter:
-  # 隐藏 8105 字表中频次低于此值的中文单字；多字词不受影响。
-  frequency_threshold: 4000
-
 pin_cand_filter:
   - d	的
   - de	的 地 得
@@ -184,13 +145,7 @@ pin_cand_filter:
 # 主翻译器：中文拼音
 translator:
   dictionary: rime_ice
-  # 开发方案使用独立棱镜，不能复用可能被其他方案旧规则覆盖的 rime_ice.prism。
-  prism: rime_ice_japanese_chinese_exact
-  # 中日混输中禁止把无效/未完成的拼音自动补成另一音节。
-  # 例如 sho 不应补成 shou 并产生“手、受、收”等中文候选。
-  enable_completion: false
-  enable_word_completion: false
-  strict_spelling: true
+  enable_word_completion: true
   spelling_hints: 0
   always_show_comments: false
   initial_quality: 1.2
@@ -201,34 +156,11 @@ translator:
     - xform/(?<=[A-Z])\s(?=[A-Z])//
 
 # 日文翻译器
-chinese_exact_translator:
-  dictionary: rime_ice
-  prism: rime_ice_japanese_chinese_exact
-  enable_sentence: false
-  enable_completion: false
-  enable_word_completion: false
-  strict_spelling: true
-  enable_user_dict: true
-  spelling_hints: 0
-  always_show_comments: false
-  initial_quality: 300
-  preedit_format:
-    - xform/([jqxy])v/$1u/
-    - xform/([nl])v/$1v/
-    - xform/([nl])ue/$1ve/
-    - xform/(?<=[A-Z])\s(?=[A-Z])//
-
 japanese_translator:
   dictionary: japanese
   enable_sentence: false
   enable_user_dict: true
-  # 跨语言固定顺序：中文精确 1.2 > 日语精确 1.1 > 日语模糊 1.0。
-  # Keep exact Japanese above fuzzy/assembled results, but allow an unfinished
-  # romanization such as "sud" to show Japanese prefix candidates.  The final
-  # ranking filter places candidate type "completion" in the last bucket.
-  enable_completion: true
-  enable_word_completion: true
-  initial_quality: 200
+  initial_quality: 0.2  # 日文权重低于中文，避免覆盖常用中文单字
   preedit_format:
     - 'xlit|q|ー|'
   comment_format:
@@ -239,73 +171,10 @@ japanese_fuzzy_translator:
   dictionary: japanese
   prism: japanese_fuzzy
   enable_sentence: false
-  enable_completion: false
-  enable_word_completion: false
   enable_user_dict: false
-  initial_quality: 100
-  spelling_hints: 100
+  initial_quality: 0.12
   comment_format:
-    - xform/^/[JF:COMBINED]/
-
-japanese_fuzzy_sokuon_translator:
-  dictionary: japanese
-  prism: japanese_fuzzy_sokuon
-  enable_sentence: false
-  enable_completion: false
-  enable_word_completion: false
-  enable_user_dict: false
-  initial_quality: 100
-  spelling_hints: 100
-  comment_format:
-    - xform/^/[JF:SOKUON]/
-
-japanese_fuzzy_long_i_translator:
-  dictionary: japanese
-  prism: japanese_fuzzy_long_i
-  enable_sentence: false
-  enable_completion: false
-  enable_word_completion: false
-  enable_user_dict: false
-  initial_quality: 100
-  spelling_hints: 100
-  comment_format:
-    - xform/^/[JF:LONG_I]/
-
-japanese_fuzzy_long_u_translator:
-  dictionary: japanese
-  prism: japanese_fuzzy_long_u
-  enable_sentence: false
-  enable_completion: false
-  enable_word_completion: false
-  enable_user_dict: false
-  initial_quality: 100
-  spelling_hints: 100
-  comment_format:
-    - xform/^/[JF:LONG_U]/
-
-japanese_fuzzy_long_mark_translator:
-  dictionary: japanese
-  prism: japanese_fuzzy_long_mark
-  enable_sentence: false
-  enable_completion: false
-  enable_word_completion: false
-  enable_user_dict: false
-  initial_quality: 100
-  spelling_hints: 100
-  comment_format:
-    - xform/^/[JF:LONG_MARK]/
-
-japanese_fuzzy_chi_ji_translator:
-  dictionary: japanese
-  prism: japanese_fuzzy_chi_ji
-  enable_sentence: false
-  enable_completion: false
-  enable_word_completion: false
-  enable_user_dict: false
-  initial_quality: 100
-  spelling_hints: 100
-  comment_format:
-    - xform/^/[JF:CHI_JI]/
+    - xform/^/〔日模糊〕/
 
 melt_eng:
   dictionary: melt_eng
@@ -418,18 +287,25 @@ speller:
   initials: zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA
   delimiter: " '"
   algebra:
-    ### 日文模糊规则禁止放在全局 algebra。
-    ### 全局变换会同时污染中文拼音；日语规则仅由 Lua 日语链处理。
+    ### 日文罗马字多拼支持（仅基本音节，不影响中文）
+    - derive/^ti$/chi/
+    - derive/^chi$/ti/
+    - derive/^tu$/tsu/
+    - derive/^tsu$/tu/
+    - derive/^si$/shi/
+    - derive/^shi$/si/
+    - derive/^hu$/fu/
+    - derive/^fu$/hu/
+    - derive/^zi$/ji/
+    - derive/^ji$/zi/
     
     ### 超级简拼
     - erase/^hm$/
     - erase/^m$/
     - erase/^n$/
     - erase/^ng$/
-    - abbrev/^([a-z]).+$/$1/        # 中文简拼：sbs → 是不是
-    # Disabled for strict mixed-input matching: this abbreviation lets an
-    # incomplete sho expand toward shou even when every correction is off.
-    - abbrev/^([zcs]h).+$/$1/       # zh/ch/sh 作为一个声母
+    - abbrev/^([a-z]).+$/$1/
+    - abbrev/^([zcs]h).+$/$1/
     
     ### v u 转换
     - derive/^([nl])ve$/$1ue/
@@ -477,7 +353,4 @@ speller:
     - derive/([qwrtypsdfghjklzxcbnm])([aeio])ng$/$1ng/
 
 menu:
-  # The expanded panel renders five rows (normally about 30 candidates).
-  # Keeping 100 candidates live forced Rime, IPC and DirectWrite to rebuild
-  # far more data than can be seen after every key and Backspace.
-  page_size: 36
+  page_size: 100
