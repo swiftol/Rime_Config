@@ -4,3 +4,5 @@
 space_commit_raw_processor = require("space_commit_raw")
 common_phrase_translator = require("common_phrase_translator")
 common_phrase_filter = require("common_phrase_filter")
+translation_annotation_filter = require("translation_annotation_filter")
+japanese_fuzzy_filter = require("japanese_fuzzy_filter")
