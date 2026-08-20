@@ -4,7 +4,7 @@
 # 雾凇拼音 + 日文混输方案
 schema:
   schema_id: rime_ice_japanese
-  name: 雾凇拼音·中日
+  name: 雾凇拼音·中日混输
   version: "1.6"
   author:
     - Dvel (雾凇拼音)
@@ -70,7 +70,7 @@ switches:
 
 engine:
   processors:
-    - lua_processor@space_commit_raw_processor  # 空格上屏+空格（必须放在最前面）
+    - lua_processor@space_commit_raw_processor  # 可切换“原文+空格”或“选择首选”（必须放在最前面）
     - lua_processor@*japanese_fuzzy_learning_processor
     - lua_processor@*select_character
     - ascii_composer
@@ -81,6 +81,7 @@ engine:
     - selector
     - navigator
     - express_editor
+
   segmentors:
     - ascii_segmentor
     - matcher
@@ -126,6 +127,9 @@ engine:
     # exact/fuzzy/assembled buckets produced here.
     - lua_filter@japanese_fuzzy_filter
     - uniquifier
+
+space_commit_raw:
+  select_first: false
 
 # Lua 配置（继承雾凇拼音）
 date_translator:

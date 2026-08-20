@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 namespace RimeSettings;
 
 internal sealed record InputOptions(
-    bool English, bool Japanese, bool ExpandedCommentWidth, bool Fuzzy,
+    bool English, bool Japanese, bool SpaceSelectFirst, bool ExpandedCommentWidth, bool Fuzzy,
     bool FuzzySokuon, bool FuzzyLongI, bool FuzzyLongU,
     bool FuzzyLongMark, bool FuzzyChiJi, bool FuzzyHuFu,
     bool FuzzyShuSho, bool FuzzyKeKai, bool FuzzyKeKaeGae,
@@ -33,6 +33,7 @@ internal sealed class SettingsStore
     public InputOptions ReadInputOptions() => new(
         ReadOption("show_english_annotation", true),
         ReadOption("show_japanese_annotation", true),
+        ReadSchemaPatchBool("space_commit_raw/select_first", false),
         ReadPatchBool("style/expanded_comment_width", true),
         ReadOption("japanese_fuzzy_match", false),
         ReadOption("japanese_fuzzy_sokuon", true),
@@ -75,6 +76,16 @@ internal sealed class SettingsStore
         text = SetOption(text, "japanese_fuzzy_dakuten", options.FuzzyDakuten);
         text = SetOption(text, "sentence_translation", options.Sentence);
         File.WriteAllText(UserYaml, text.TrimEnd() + "\n", new UTF8Encoding(false));
+
+        var schemaText = File.Exists(JapaneseSchemaCustomYaml)
+            ? File.ReadAllText(JapaneseSchemaCustomYaml, Encoding.UTF8)
+            : "patch:\n";
+        if (!Regex.IsMatch(schemaText, @"(?m)^patch:\s*$"))
+            schemaText = schemaText.TrimEnd() + "\n\npatch:\n";
+        schemaText = SetPatchBool(schemaText, "space_commit_raw/select_first",
+                                  options.SpaceSelectFirst);
+        File.WriteAllText(JapaneseSchemaCustomYaml, schemaText.TrimEnd() + "\n",
+                          new UTF8Encoding(false));
 
         var weaselText = File.Exists(WeaselCustomYaml)
             ? File.ReadAllText(WeaselCustomYaml, Encoding.UTF8)
@@ -171,6 +182,15 @@ internal sealed class SettingsStore
     {
         if (!File.Exists(WeaselCustomYaml)) return fallback;
         var text = File.ReadAllText(WeaselCustomYaml, Encoding.UTF8);
+        var match = Regex.Match(text,
+            $@"(?m)^\s*[""']?{Regex.Escape(key)}[""']?\s*:\s*(true|false)\s*$");
+        return match.Success ? match.Groups[1].Value == "true" : fallback;
+    }
+
+    private bool ReadSchemaPatchBool(string key, bool fallback)
+    {
+        if (!File.Exists(JapaneseSchemaCustomYaml)) return fallback;
+        var text = File.ReadAllText(JapaneseSchemaCustomYaml, Encoding.UTF8);
         var match = Regex.Match(text,
             $@"(?m)^\s*[""']?{Regex.Escape(key)}[""']?\s*:\s*(true|false)\s*$");
         return match.Success ? match.Groups[1].Value == "true" : fallback;

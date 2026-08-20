@@ -1,4 +1,4 @@
-#define MyAppName "雾凇拼音·中日"
+#define MyAppName "雾凇拼音·中日混输输入法"
 #define MyAppVersion "9.0.0"
 #define MyAppPublisher "swiftol"
 

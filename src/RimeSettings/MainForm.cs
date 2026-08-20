@@ -45,7 +45,7 @@ internal sealed class MainForm : Form
         _phrases = _phraseStore.Load();
         _clipboardEntries = _clipboardStore.Load();
 
-        Text = "雾凇拼音·中日设置";
+        Text = "雾凇拼音·中日混输输入法设置";
         ClientSize = new Size(1100, 720);
         MinimumSize = new Size(920, 620);
         BackColor = Theme.Window;
@@ -585,33 +585,34 @@ internal sealed class MainForm : Form
         SelectNav("settings");
         ClearContent();
         _content.AutoScroll = true;
-        _content.AutoScrollMinSize = new Size(0, 1140);
+        _content.AutoScrollMinSize = new Size(0, 1210);
         BuildHeading("输入设置", "控制中日方案的翻译注释和日语模糊匹配。");
         var values = _settings.ReadInputOptions();
-        var card = new RoundedPanel { Dock = DockStyle.Top, Height = 1020, BackColor = Theme.Surface, Radius = 12 };
+        var card = new RoundedPanel { Dock = DockStyle.Top, Height = 1090, BackColor = Theme.Surface, Radius = 12 };
         var en = AddSwitchRow(card, "显示英文注释", "候选词下方显示简短英文释义", "Ctrl + Alt + E", values.English, 0);
         var ja = AddSwitchRow(card, "显示日文注释", "候选词下方显示日语释义", "Ctrl + Alt + J", values.Japanese, 70);
-        var expandedCommentWidth = AddSwitchRow(card, "展开时注释参与宽度", "按候选词、英文和日文注释中最宽的一行分配格数", "", values.ExpandedCommentWidth, 140);
-        var rareThreshold = AddNumberRow(card, "生僻单字过滤门槛", "0=不过滤；数值越高，隐藏的低频单字越多（建议 4000）", _settings.ReadRareSingleCharThreshold(), 0, 50000, 500, 210);
-        var fuzzy = AddSwitchRow(card, "日语模糊匹配（总开关）", "只启用下方已勾选的容错规则", "Ctrl + Alt + F", values.Fuzzy, 280);
-        var sokuon = AddSwitchRow(card, "　促音省略", "kitte 输入 kite 也能匹配", "", values.FuzzySokuon, 350);
-        var longI = AddSwitchRow(card, "　长音 い", "省略表示长音的 i 也能匹配", "", values.FuzzyLongI, 405);
-        var longU = AddSwitchRow(card, "　长音 う", "省略表示长音的 u 也能匹配", "", values.FuzzyLongU, 460);
-        var longMark = AddSwitchRow(card, "　片假名长音 ー", "例如 kopii 也能匹配 コピー", "", values.FuzzyLongMark, 515);
-        var chiJi = AddSwitchRow(card, "　ち / じ", "chi 与 ji 可互相容错匹配", "", values.FuzzyChiJi, 570);
-        var huFu = AddSwitchRow(card, "　ふ：hu / fu", "词首或词中 hu 与 fu 可互相容错", "", values.FuzzyHuFu, 625);
-        var shuSho = AddSwitchRow(card, "　しゅ / しょ", "shu 与 sho 可互相容错匹配", "", values.FuzzyShuSho, 680);
-        var keKai = AddSwitchRow(card, "　け / かい：ke / kai", "例如 seke 也能匹配 世界（sekai）", "", values.FuzzyKeKai, 735);
-        var keKaeGae = AddSwitchRow(card, "　ke / kae / gae", "例如 kikeru 也能匹配 着替える（kigaeru）", "", values.FuzzyKeKaeGae, 790);
-        var seiSai = AddSwitchRow(card, "　せい / さい：sei / sai", "sei 与 sai 可互相容错匹配", "", values.FuzzySeiSai, 845);
-        var dakuten = AddSwitchRow(card, "　浊音 / 半浊音", "t/d、p/b/h 容错，可与促音组合", "", values.FuzzyDakuten, 900);
-        var apply = PrimaryButton("应用设置", 24, 970, 118);
+        var spaceSelectFirst = AddSwitchRow(card, "空格键选择首选词", "开启后与常见输入法一致；关闭时上屏原始字母并补一个空格", "", values.SpaceSelectFirst, 140);
+        var expandedCommentWidth = AddSwitchRow(card, "展开时注释参与宽度", "按候选词、英文和日文注释中最宽的一行分配格数", "", values.ExpandedCommentWidth, 210);
+        var rareThreshold = AddNumberRow(card, "生僻单字过滤门槛", "0=不过滤；数值越高，隐藏的低频单字越多（建议 4000）", _settings.ReadRareSingleCharThreshold(), 0, 50000, 500, 280);
+        var fuzzy = AddSwitchRow(card, "日语模糊匹配（总开关）", "只启用下方已勾选的容错规则", "Ctrl + Alt + F", values.Fuzzy, 350);
+        var sokuon = AddSwitchRow(card, "　促音省略", "kitte 输入 kite 也能匹配", "", values.FuzzySokuon, 420);
+        var longI = AddSwitchRow(card, "　长音 い", "省略表示长音的 i 也能匹配", "", values.FuzzyLongI, 475);
+        var longU = AddSwitchRow(card, "　长音 う", "省略表示长音的 u 也能匹配", "", values.FuzzyLongU, 530);
+        var longMark = AddSwitchRow(card, "　片假名长音 ー", "例如 kopii 也能匹配 コピー", "", values.FuzzyLongMark, 585);
+        var chiJi = AddSwitchRow(card, "　ち / じ", "chi 与 ji 可互相容错匹配", "", values.FuzzyChiJi, 640);
+        var huFu = AddSwitchRow(card, "　ふ：hu / fu", "词首或词中 hu 与 fu 可互相容错", "", values.FuzzyHuFu, 695);
+        var shuSho = AddSwitchRow(card, "　しゅ / しょ", "shu 与 sho 可互相容错匹配", "", values.FuzzyShuSho, 750);
+        var keKai = AddSwitchRow(card, "　け / かい：ke / kai", "例如 seke 也能匹配 世界（sekai）", "", values.FuzzyKeKai, 805);
+        var keKaeGae = AddSwitchRow(card, "　ke / kae / gae", "例如 kikeru 也能匹配 着替える（kigaeru）", "", values.FuzzyKeKaeGae, 860);
+        var seiSai = AddSwitchRow(card, "　せい / さい：sei / sai", "sei 与 sai 可互相容错匹配", "", values.FuzzySeiSai, 915);
+        var dakuten = AddSwitchRow(card, "　浊音 / 半浊音", "t/d、p/b/h 容错，可与促音组合", "", values.FuzzyDakuten, 970);
+        var apply = PrimaryButton("应用设置", 24, 1040, 118);
         async Task SaveAndApplyAsync(bool deploy)
         {
             // Persist before the first await so navigating to another page can
             // never recreate these switches from stale values.
             _settings.SaveInputOptions(new InputOptions(
-                en.Checked, ja.Checked, expandedCommentWidth.Checked, fuzzy.Checked,
+                en.Checked, ja.Checked, spaceSelectFirst.Checked, expandedCommentWidth.Checked, fuzzy.Checked,
                 sokuon.Checked, longI.Checked, longU.Checked,
                 longMark.Checked, chiJi.Checked, huFu.Checked,
                 shuSho.Checked, keKai.Checked, keKaeGae.Checked,
@@ -643,6 +644,23 @@ internal sealed class MainForm : Form
         }
         en.CheckedChanged += SaveImmediately;
         ja.CheckedChanged += SaveImmediately;
+        spaceSelectFirst.CheckedChanged += async (_, _) =>
+        {
+            try
+            {
+                apply.Text = "正在部署…";
+                apply.Enabled = false;
+                await SaveAndApplyAsync(true);
+            }
+            finally
+            {
+                if (!apply.IsDisposed)
+                {
+                    apply.Text = "已生效";
+                    apply.Enabled = true;
+                }
+            }
+        };
         expandedCommentWidth.CheckedChanged += async (_, _) =>
         {
             try
@@ -893,7 +911,7 @@ internal sealed class MainForm : Form
         };
         var note = new Label
         {
-            Text = "V5 备份保持冻结；本面板操作的是当前“中日”开发配置。",
+            Text = "当前仅维护 V9；本面板操作的是正在使用的“雾凇拼音·中日”配置。",
             Left = 24,
             Top = 142,
             Width = 680,

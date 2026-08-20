@@ -23,8 +23,6 @@ internal static class PagingCompatibility
                 continue;
 
             var schemaId = idMatch.Groups[1].Value;
-            if (schemaId is "rime_ice_japanese_v4" or "rime_ice_japanese_v5") continue;
-
             var customPath = Path.Combine(rimeDirectory, schemaId + ".custom.yaml");
             var custom = File.Exists(customPath) ? File.ReadAllText(customPath, Encoding.UTF8) : "";
             if (PatchPageSize.IsMatch(custom))

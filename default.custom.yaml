@@ -10,8 +10,6 @@ patch:
   "menu/page_size": 100
   schema_list:
     - {schema: rime_ice_japanese}
-    - {schema: rime_ice_japanese_v4}
-    - {schema: rime_ice_japanese_v5}
   switcher:
     caption: "〔方案選單〕"
     hotkeys: ["Control+grave", F4]
