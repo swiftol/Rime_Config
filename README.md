@@ -30,17 +30,7 @@
 
 按 `F4` 打开方案菜单。V9 安装包只提供当前维护的“雾凇拼音·中日”方案，不再附带 V4～V8 等历史备份方案。
 
-## 隐私
 
-公开仓库和安装包只包含项目自带的基础配置与完整公共词库，不包含开发者或用户的输入历史。以下私人数据不会进入 Git 仓库或安装包：
-
-- `*.userdb`、`*.userdb.kct`
-- `user.yaml`、`installation.yaml`
-- `sync/` 同步数据
-- 剪贴板历史
-- 用户自定义短语和个人备份
-
-每台电脑在使用过程中产生的词频学习和个人常用词只保留在该电脑本地。
 
 ## 源码目录
 
@@ -52,4 +42,4 @@
 
 ## 致谢与许可
 
-本项目基于 [雾凇拼音](https://github.com/iDvel/rime-ice)、[Rime](https://rime.im/) 和 [小狼毫](https://github.com/rime/weasel) 开发。各部分遵循其目录中注明的原始许可证；二次修改部分按仓库许可证发布。
+本项目基于 [雾凇拼音](https://github.com/iDvel/rime-ice)、[rime-japanese](https://github.com/gkovacs/rime-japanese)， [Rime](https://rime.im/) 和 [小狼毫](https://github.com/rime/weasel) 开发。各部分遵循其目录中注明的原始许可证；二次修改部分按仓库许可证发布。
