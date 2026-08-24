@@ -16,6 +16,7 @@ schema:
     - melt_eng
     - radical_pinyin
     - japanese
+    - japanese_fuzzy
     - japanese_fuzzy_sokuon
     - japanese_fuzzy_long_i
     - japanese_fuzzy_long_u
@@ -40,6 +41,9 @@ switches:
     states: [ 英关, 英注 ]
   - name: show_japanese_annotation
     states: [ 日关, 日注 ]
+  - name: japanese_continuation_lock
+    states: [ 续输混合, 日语续输 ]
+    reset: 1
 
 # 输入引擎
   - name: japanese_fuzzy_match
@@ -70,6 +74,7 @@ switches:
 
 engine:
   processors:
+    - lua_processor@numeric_phrase_processor  # 纯数字常用语编码；不影响普通候选数字选词
     - lua_processor@space_commit_raw_processor  # 可切换“原文+空格”或“选择首选”（必须放在最前面）
     - lua_processor@*japanese_fuzzy_learning_processor
     - lua_processor@*select_character
@@ -92,6 +97,8 @@ engine:
   translators:
     # 常用语先于普通中日词库产生候选，避免 aa 等冲突编码被挤到后页。
     - punct_translator
+    - table_translator@builtin_shortcuts
+    - lua_translator@common_phrase_translator
     - script_translator@chinese_exact_translator
     - script_translator@japanese_translator  # 日文精确匹配
     - lua_translator@*japanese_prefix_translator  # 至少 3 字母的日文前缀联想
@@ -126,10 +133,14 @@ engine:
     # Ordering must be last: earlier ranking filters otherwise undo the
     # exact/fuzzy/assembled buckets produced here.
     - lua_filter@japanese_fuzzy_filter
+    # Common phrases are the final explicit ranking override: keep the normal
+    # first candidate, then put configured phrases immediately after it.
+    - lua_filter@common_phrase_filter
     - uniquifier
 
 space_commit_raw:
   select_first: false
+  reading_preview: false
 
 # Lua 配置（继承雾凇拼音）
 date_translator:
@@ -192,9 +203,8 @@ translator:
   prism: rime_ice_japanese_chinese_exact
   # 中日混输中禁止把无效/未完成的拼音自动补成另一音节。
   # 例如 sho 不应补成 shou 并产生“手、受、收”等中文候选。
-  enable_completion: false
-  enable_word_completion: false
-  strict_spelling: true
+  enable_completion: true
+  enable_word_completion: true
   spelling_hints: 0
   always_show_comments: false
   initial_quality: 1.2
@@ -209,9 +219,8 @@ chinese_exact_translator:
   dictionary: rime_ice
   prism: rime_ice_japanese_chinese_exact
   enable_sentence: false
-  enable_completion: false
-  enable_word_completion: false
-  strict_spelling: true
+  enable_completion: true
+  enable_word_completion: true
   enable_user_dict: true
   spelling_hints: 0
   always_show_comments: false
@@ -339,6 +348,16 @@ custom_phrase:
   enable_sentence: false
   initial_quality: 99
 
+# 内置快捷词独立于中文拼音棱镜，避免 l、z、w 等单字母编码
+# 被当作完整音节并破坏 zw、sbs 等正常中文简拼。
+builtin_shortcuts:
+  dictionary: ""
+  user_dict: builtin_shortcuts
+  db_class: stabledb
+  enable_completion: false
+  enable_sentence: false
+  initial_quality: 301
+
 # Emoji
 emoji:
   option_name: emoji
@@ -380,6 +399,7 @@ radical_reverse_lookup:
 recognizer:
   import_preset: default
   patterns:
+    numeric_phrase: "^[0-9]+$"
     punct: "^v([0-9]|10|[A-Za-z]+)$"
     radical_lookup: "^uU[a-z]+$"
     unicode: "^U[a-f0-9]+"

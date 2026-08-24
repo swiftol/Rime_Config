@@ -27,8 +27,7 @@ patch:
   "style/comment_font_point": 11
   "style/layout/max_width": 0
   "style/layout/min_height": 0
-  "style/layout/min_width": 600
-  # 横向候选框固定为 600；超过上限时前端自动少显示候选。
-  "style/layout/min_width": 600
+  # 单行候选窗按当前候选内容自适应；最长候选决定宽度。
+  "style/layout/min_width": 0
   "style/layout/round_corner": 4
   "style/layout/spacing": 8

@@ -5,6 +5,11 @@ local M = {}
 
 function M.init(env)
   env.memory = Memory(env.engine, Schema("japanese_fuzzy"))
+  -- Query the fuzzy prism through a real script translator.  Memory lookup
+  -- reads dictionary codes directly and does not apply the prism algebra, so
+  -- it cannot by itself resolve sasuka -> sasuga -> さすが.
+  env.prism_translator = Component.Translator(
+    env.engine, "", "script_translator@japanese_fuzzy_translator")
   -- Corrected spellings (for example kegi -> kaigi) must first query the
   -- compact exact prism. Looking only in the huge fuzzy prism can bury the
   -- desired whole word beyond its bounded result window.
@@ -109,6 +114,22 @@ function M.func(input, segment, env)
     if compact:find("t", 1, true) then add_query((compact:gsub("t", "d"))) end
   end
   local seen = {}
+  -- Run the compiled fuzzy prism only while the master switch is enabled.
+  -- This keeps normal typing/Backspace fast while allowing its algebra to
+  -- perform general syllable corrections such as ga <-> ka.
+  if env.prism_translator then
+    local translation = env.prism_translator:query(compact, segment)
+    if translation then
+      for candidate in translation:iter() do
+        local marked = ShadowCandidate(
+          candidate, candidate.type, candidate.text,
+          (candidate.comment or "") .. "[[JF_TYPED:" .. compact .. "]]"
+        )
+        marked.quality = 199
+        yield(marked)
+      end
+    end
+  end
   -- Finish all exact lookups (typed spelling, then corrected spellings)
   -- before entering the broad fuzzy prism.  Otherwise generic kegi fuzzy
   -- results can precede the exact corrected kaigi / 会議 result.
@@ -126,13 +147,18 @@ function M.func(input, segment, env)
             -- may also contain an already selected prefix (for example
             -- イオン + kontororu), so the downstream filter must not compare
             -- this candidate against the whole composition.
-            phrase.comment = "[JF:COMBINED]" .. spelling .. string.char(30) .. compact
+            phrase.comment = "[JF:COMBINED]" .. spelling ..
+                             "[[JF_TYPED:" .. compact .. "]]"
             local candidate = phrase:toCandidate()
             -- Cross-language priority contract:
-            -- Chinese exact (300) > Japanese exact (200) > fuzzy (100) >
+            -- Chinese exact (300) > Japanese exact (200) > fuzzy (199) >
             -- assembled candidates.  Lua translators do not inherit the
             -- schema translator's initial_quality automatically.
-            candidate.quality = 100
+            -- Keep corrected whole-word candidates inside the filter's
+            -- bounded head window.  At 100, a valid correction such as
+            -- sasuka -> sasuga -> さすが could be buried behind hundreds of
+            -- prefix candidates before the ranking filter ever saw it.
+            candidate.quality = 199
             yield(candidate)
           end
         end

@@ -6,12 +6,14 @@ namespace RimeSettings;
 
 internal sealed class PhraseDialog : Form
 {
+    private readonly string _rimeDirectory;
     private readonly TextBox _content;
     private readonly TextBox _code;
     public CommonPhrase? Result { get; private set; }
 
-    public PhraseDialog(CommonPhrase? phrase = null)
+    public PhraseDialog(string rimeDirectory, CommonPhrase? phrase = null)
     {
+        _rimeDirectory = rimeDirectory;
         Text = phrase is null ? "添加常用语" : "编辑常用语";
         ClientSize = new Size(540, 350);
         BackColor = Theme.Window;
@@ -28,6 +30,7 @@ internal sealed class PhraseDialog : Form
         _content = InputFor(28, 98, 484, 112, true);
         var codeLabel = LabelFor("输入码", 31, 226);
         _code = InputFor(28, 250, 484, 42, false);
+        _code.PlaceholderText = "可留空：中文取前三字拼音首字母；英文/数字取前三位";
         _content.Text = phrase?.Content ?? "";
         _code.Text = phrase?.Code ?? "";
 
@@ -44,9 +47,15 @@ internal sealed class PhraseDialog : Form
     {
         var content = _content.Text.Replace("\r", " ").Replace("\n", " ").Trim();
         var code = _code.Text.Trim().ToLowerInvariant();
-        if (content.Length == 0 || code.Length == 0)
+        if (content.Length == 0)
         {
-            MessageBox.Show(this, "内容和输入码都不能为空。", "常用语", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(this, "常用语内容不能为空。", "常用语", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+        if (code.Length == 0) code = PhraseCodeGenerator.Generate(content, _rimeDirectory);
+        if (code.Length == 0)
+        {
+            MessageBox.Show(this, "无法自动生成输入码，请手动填写。", "常用语", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
         foreach (var c in code)

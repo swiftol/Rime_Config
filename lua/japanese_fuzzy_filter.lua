@@ -243,6 +243,48 @@ end
 
 local LANGUAGE_JA = "[[RIME_LANG:JA]]"
 local LANGUAGE_ZH = "[[RIME_LANG:ZH]]"
+local tag_candidate_language
+
+-- Frequently typed Japanese particles should be immediately visible in the
+-- mixed candidate list.  Keep the first exact Chinese candidate, then place
+-- the matching particle, followed by the remaining exact candidates.
+local PRIORITY_PARTICLES = {
+  ha="は", wa="は", ka="か", ga="が", no="の", wo="を", o="を",
+  ni="に", he="へ", e="へ", to="と", de="で", mo="も", ya="や",
+  kara="から", yori="より", koso="こそ", sae="さえ", shika="しか",
+  dake="だけ", made="まで", hodo="ほど", kurai="くらい", gurai="ぐらい",
+  nado="など", demo="でも", tte="って", node="ので", noni="のに",
+  kedo="けど", temo="ても", nagara="ながら", ne="ね", yo="よ",
+  na="な", zo="ぞ", ze="ぜ", sa="さ", kana="かな", kashira="かしら",
+}
+
+local function is_priority_particle(cand, typed)
+  local wanted = PRIORITY_PARTICLES[typed]
+  if not wanted or cand.text ~= wanted then return false end
+  local preedit = (cand.preedit or ""):lower():gsub("[%s']+", "")
+  local quality = tonumber(cand.quality) or 0
+  return preedit == typed and quality >= 50 and quality < 299
+end
+
+local function yield_exact_with_particle_second(items, typed)
+  if #items == 0 then return end
+  local preferred = {}
+  local ordinary = {}
+  for _, cand in ipairs(items) do
+    if is_priority_particle(cand, typed) then
+      preferred[#preferred + 1] = cand
+    else
+      ordinary[#ordinary + 1] = cand
+    end
+  end
+  if #ordinary > 0 then
+    yield(tag_candidate_language(ordinary[1]))
+    for _, cand in ipairs(preferred) do yield(tag_candidate_language(cand)) end
+    for i = 2, #ordinary do yield(tag_candidate_language(ordinary[i])) end
+  else
+    for _, cand in ipairs(preferred) do yield(tag_candidate_language(cand)) end
+  end
+end
 
 local function strip_language_metadata(value)
   return (value or ""):gsub("%[%[RIME_LANG:JA%]%]", "")
@@ -256,7 +298,7 @@ local function has_script(text, first, last)
   return false
 end
 
-local function tag_candidate_language(cand)
+tag_candidate_language = function(cand)
   local comment = cand.comment or ""
   if comment:find("[[RIME_LANG:", 1, true) then return cand end
   local quality = tonumber(cand.quality) or 0
@@ -279,7 +321,23 @@ end
 local function japanese_fuzzy_filter(input, env)
   local context = env.engine.context
   local master_enabled = context:get_option("japanese_fuzzy_match")
-  local typed = (context.input or ""):lower():gsub("[%s']+", "")
+  -- After a partial candidate has been selected context.input still contains
+  -- the whole original spelling.  Ranking, however, must compare candidates
+  -- with the active (unselected) segment only.
+  local raw_input = context.input or ""
+  local active = context.composition and context.composition:back() or nil
+  local active_input = raw_input
+  if active and active.start and active.start > 0 then
+    active_input = raw_input:sub(active.start + 1, active._end or #raw_input)
+  end
+  local typed = active_input:lower():gsub("[%s']+", "")
+  local continuation_ja = false
+  if context:get_option("japanese_continuation_lock") and active and
+     active.start and active.start > 0 then
+    local preedit = context:get_preedit()
+    local shown = preedit and preedit.text or ""
+    continuation_ja = has_script(shown, 0x3040, 0x30ff)
+  end
 
   -- librime treats an unfinished `sho` as a prefix of Chinese `shou` even
   -- when completion, strict spelling and every correction algebra are off.
@@ -295,6 +353,8 @@ local function japanese_fuzzy_filter(input, env)
   -- Drop the combined translator's marked candidates lazily and pass every
   -- normal candidate through immediately.
   if not master_enabled then
+    local head = {}
+    local HEAD_LIMIT = 48
     for cand in input:iter() do
       local comment = cand.comment or ""
       local is_fuzzy = comment:sub(1, #COMBINED_MARKER) == COMBINED_MARKER
@@ -307,9 +367,18 @@ local function japanese_fuzzy_filter(input, env)
         end
       end
       if not is_fuzzy and not is_hidden_chinese_completion(cand) then
-        yield(tag_candidate_language(cand))
+        if #head < HEAD_LIMIT then
+          head[#head + 1] = cand
+        else
+          if #head > 0 then
+            yield_exact_with_particle_second(head, typed)
+            head = {}
+          end
+          yield(tag_candidate_language(cand))
+        end
       end
     end
+    if #head > 0 then yield_exact_with_particle_second(head, typed) end
     return
   end
 
@@ -352,7 +421,7 @@ local function japanese_fuzzy_filter(input, env)
   end
 
   local function flush()
-    for _, cand in ipairs(exact) do yield(tag_candidate_language(cand)) end
+    yield_exact_with_particle_second(exact, typed)
     table.sort(fuzzy_kanji, function(a, b)
       local learned_a = fuzzy_learning.score(typed, a.text)
       local learned_b = fuzzy_learning.score(typed, b.text)
@@ -365,8 +434,28 @@ local function japanese_fuzzy_filter(input, env)
       if distance_a ~= distance_b then return distance_a < distance_b end
       return false
     end)
-    for _, cand in ipairs(fuzzy_kanji) do yield(tag_candidate_language(cand)) end
-    for _, cand in ipairs(fuzzy_other) do yield(tag_candidate_language(cand)) end
+    -- Keep the standard kana form beside the first kanji form with the same
+    -- reading.  Otherwise rare spellings can fill the whole visible row
+    -- before a common form such as さすが appears.
+    local emitted_other = {}
+    local reading_seen = {}
+    for _, cand in ipairs(fuzzy_kanji) do
+      yield(tag_candidate_language(cand))
+      local reading = (cand.comment or ""):match("%[JF_READING%](.*)$") or ""
+      if reading ~= "" and not reading_seen[reading] then
+        reading_seen[reading] = true
+        for index, other in ipairs(fuzzy_other) do
+          local other_reading = (other.comment or ""):match("%[JF_READING%](.*)$") or ""
+          if other_reading == reading then
+            yield(tag_candidate_language(other))
+            emitted_other[index] = true
+          end
+        end
+      end
+    end
+    for index, cand in ipairs(fuzzy_other) do
+      if not emitted_other[index] then yield(tag_candidate_language(cand)) end
+    end
     for _, cand in ipairs(assembled) do yield(tag_candidate_language(cand)) end
     for _, cand in ipairs(completion) do yield(tag_candidate_language(cand)) end
     exact, fuzzy_kanji, fuzzy_other, assembled, completion = {}, {}, {}, {}, {}
@@ -374,6 +463,7 @@ local function japanese_fuzzy_filter(input, env)
 
   for cand in input:iter() do
     local comment = cand.comment or ""
+    local tagged_comment = comment
     -- A candidate may pass through this filter again after a UI/context
     -- refresh.  Remove transport tags from the previous pass before parsing
     -- the fuzzy reading and appending exactly one fresh language tag.
@@ -389,11 +479,21 @@ local function japanese_fuzzy_filter(input, env)
     if comment:sub(1, #COMBINED_MARKER) == COMBINED_MARKER then
       local payload = comment:sub(#COMBINED_MARKER + 1)
       local segment_typed
-      spelling, segment_typed = payload:match("^(.-)" .. string.char(30) .. "(.*)$")
+      spelling, segment_typed = payload:match("^(.-)%[%[JF_TYPED:(.-)%]%]$")
+      if not spelling then
+        spelling, segment_typed = payload:match("^(.-)" .. string.char(30) .. "(.*)$")
+      end
       if not spelling then spelling = payload end
       spelling = strip_language_metadata(spelling)
       segment_typed = strip_language_metadata(segment_typed)
-      segment_typed = segment_typed or typed
+      -- The record-separator payload can be stripped by an intermediate
+      -- candidate rebuild, leaving an empty string.  Empty strings are truthy
+      -- in Lua, so `segment_typed or typed` would not fall back and every
+      -- fuzzy rule would compare against "".  Treat empty as missing.
+      if not segment_typed or segment_typed == "" then
+        segment_typed = (cand.preedit or ""):lower():gsub("[%s']+", "")
+      end
+      if segment_typed == "" then segment_typed = typed end
       if master_enabled then
         matched_rule = combined_rule_for(spelling, segment_typed, context)
       end
@@ -411,11 +511,33 @@ local function japanese_fuzzy_filter(input, env)
       end
     elseif not matched_rule and comment:sub(1, #COMBINED_MARKER) ~= COMBINED_MARKER
            and not is_hidden_chinese_completion(cand) then
+      local quality = tonumber(cand.quality) or 0
+      local candidate_has_kana = has_script(cand.text, 0x3040, 0x30ff)
+      local candidate_has_han = has_script(cand.text, 0x3400, 0x9fff) or
+                                has_script(cand.text, 0xf900, 0xfaff)
+      local candidate_is_japanese = candidate_has_kana or
+                                    comment:find("[JF", 1, true) == 1 or
+                                    (quality >= 50 and quality < 299)
+      local is_chinese = tagged_comment:find(LANGUAGE_ZH, 1, true) ~= nil or
+                         quality >= 299 or
+                         (quality >= 1.19 and quality < 2) or
+                         (candidate_has_han and not candidate_is_japanese)
+      if continuation_ja and is_chinese then
+        -- The preceding selected segment is Japanese.  Keep the remainder in
+        -- the same language instead of restarting Chinese mixed input.
+        goto continue
+      end
       if buffered < BUFFER_LIMIT then
         local preedit = (cand.preedit or ""):lower():gsub("[%s']+", "")
         if cand.type == "completion" then
           completion[#completion + 1] = cand
-        elseif preedit == typed then
+        -- Only a candidate whose complete spelling equals the active input
+        -- is exact.  Translator quality alone is insufficient: prefix
+        -- candidates such as sasu under sasuka also carry Japanese quality
+        -- 200 and must stay behind the whole-word fuzzy match さすが.
+        elseif preedit == typed and
+               (cand.type ~= "sentence" or
+                has_script(cand.text, 0x3040, 0x30ff)) then
           exact[#exact + 1] = cand
         else
           assembled[#assembled + 1] = cand
@@ -424,6 +546,7 @@ local function japanese_fuzzy_filter(input, env)
         yield(tag_candidate_language(cand))
       end
     end
+    ::continue::
     buffered = buffered + 1
     if buffered == BUFFER_LIMIT then flush() end
   end

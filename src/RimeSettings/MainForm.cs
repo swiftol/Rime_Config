@@ -356,7 +356,7 @@ internal sealed class MainForm : Form
 
     private void AddPhrase()
     {
-        using var dialog = new PhraseDialog();
+        using var dialog = new PhraseDialog(_phraseStore.RimeDirectory);
         if (dialog.ShowDialog(this) != DialogResult.OK || dialog.Result is null) return;
         if (_phrases.Any(p => p.Code.Equals(dialog.Result.Code, StringComparison.OrdinalIgnoreCase)) &&
             MessageBox.Show(this, "这个输入码已经存在，仍然添加吗？", "常用语", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
@@ -367,7 +367,7 @@ internal sealed class MainForm : Form
 
     private void EditPhrase(int index)
     {
-        using var dialog = new PhraseDialog(_phrases[index]);
+        using var dialog = new PhraseDialog(_phraseStore.RimeDirectory, _phrases[index]);
         if (dialog.ShowDialog(this) != DialogResult.OK || dialog.Result is null) return;
         _phrases[index] = dialog.Result;
         PersistPhrases();
@@ -585,34 +585,43 @@ internal sealed class MainForm : Form
         SelectNav("settings");
         ClearContent();
         _content.AutoScroll = true;
-        _content.AutoScrollMinSize = new Size(0, 1210);
+        _content.AutoScrollMinSize = new Size(0, 1610);
         BuildHeading("输入设置", "控制中日方案的翻译注释和日语模糊匹配。");
         var values = _settings.ReadInputOptions();
-        var card = new RoundedPanel { Dock = DockStyle.Top, Height = 1090, BackColor = Theme.Surface, Radius = 12 };
+        var card = new RoundedPanel { Dock = DockStyle.Top, Height = 1580, BackColor = Theme.Surface, Radius = 12 };
         var en = AddSwitchRow(card, "显示英文注释", "候选词下方显示简短英文释义", "Ctrl + Alt + E", values.English, 0);
         var ja = AddSwitchRow(card, "显示日文注释", "候选词下方显示日语释义", "Ctrl + Alt + J", values.Japanese, 70);
-        var spaceSelectFirst = AddSwitchRow(card, "空格键选择首选词", "开启后与常见输入法一致；关闭时上屏原始字母并补一个空格", "", values.SpaceSelectFirst, 140);
-        var expandedCommentWidth = AddSwitchRow(card, "展开时注释参与宽度", "按候选词、英文和日文注释中最宽的一行分配格数", "", values.ExpandedCommentWidth, 210);
-        var rareThreshold = AddNumberRow(card, "生僻单字过滤门槛", "0=不过滤；数值越高，隐藏的低频单字越多（建议 4000）", _settings.ReadRareSingleCharThreshold(), 0, 50000, 500, 280);
-        var fuzzy = AddSwitchRow(card, "日语模糊匹配（总开关）", "只启用下方已勾选的容错规则", "Ctrl + Alt + F", values.Fuzzy, 350);
-        var sokuon = AddSwitchRow(card, "　促音省略", "kitte 输入 kite 也能匹配", "", values.FuzzySokuon, 420);
-        var longI = AddSwitchRow(card, "　长音 い", "省略表示长音的 i 也能匹配", "", values.FuzzyLongI, 475);
-        var longU = AddSwitchRow(card, "　长音 う", "省略表示长音的 u 也能匹配", "", values.FuzzyLongU, 530);
-        var longMark = AddSwitchRow(card, "　片假名长音 ー", "例如 kopii 也能匹配 コピー", "", values.FuzzyLongMark, 585);
-        var chiJi = AddSwitchRow(card, "　ち / じ", "chi 与 ji 可互相容错匹配", "", values.FuzzyChiJi, 640);
-        var huFu = AddSwitchRow(card, "　ふ：hu / fu", "词首或词中 hu 与 fu 可互相容错", "", values.FuzzyHuFu, 695);
-        var shuSho = AddSwitchRow(card, "　しゅ / しょ", "shu 与 sho 可互相容错匹配", "", values.FuzzyShuSho, 750);
-        var keKai = AddSwitchRow(card, "　け / かい：ke / kai", "例如 seke 也能匹配 世界（sekai）", "", values.FuzzyKeKai, 805);
-        var keKaeGae = AddSwitchRow(card, "　ke / kae / gae", "例如 kikeru 也能匹配 着替える（kigaeru）", "", values.FuzzyKeKaeGae, 860);
-        var seiSai = AddSwitchRow(card, "　せい / さい：sei / sai", "sei 与 sai 可互相容错匹配", "", values.FuzzySeiSai, 915);
-        var dakuten = AddSwitchRow(card, "　浊音 / 半浊音", "t/d、p/b/h 容错，可与促音组合", "", values.FuzzyDakuten, 970);
-        var apply = PrimaryButton("应用设置", 24, 1040, 118);
+        var inlinePreedit = AddSwitchRow(card, "输入字母显示在应用输入框", "候选窗只保留候选词，关闭后恢复顶部输入码", "", values.InlinePreedit, 140);
+        var inlineRaw = AddSwitchRow(card, "输入码连续显示", "开启显示 dsf；关闭后保留 Rime 的音节间隔", "", values.InlinePreeditRawInput, 210);
+        var enterSubmitsToApp = AddSwitchRow(card, "回车：提交字母并执行", "一次回车先提交当前字母，再交给软件执行搜索、发送或换行", "", values.EnterSubmitsToApp, 280);
+        var spaceRaw = AddSwitchRow(card, "空格：原文和空格上屏", "输入字母原样上屏，并在末尾补一个空格", "", !values.SpaceSelectFirst && !values.SpaceReadingPreview, 350);
+        var spaceSelectFirst = AddSwitchRow(card, "空格：选择第一候选", "与常见输入法一致，直接选择第一个词上屏", "", values.SpaceSelectFirst, 420);
+        var spaceReading = AddSwitchRow(card, "空格：按住显示日语读音", "按住时显示平假名读音，松开后恢复日语汉字", "", values.SpaceReadingPreview, 490);
+        var longPressReading = AddSwitchRow(card, "读音预览仅长按触发", "短按保留 Shift/空格原功能；长按才显示读音", "", values.LongPressReadingPreview, 560);
+        var expandedCommentWidth = AddSwitchRow(card, "展开时注释参与宽度", "按候选词、英文和日文注释中最宽的一行分配格数", "", values.ExpandedCommentWidth, 630);
+        var rareThreshold = AddNumberRow(card, "生僻单字过滤门槛", "0=不过滤；数值越高，隐藏的低频单字越多（建议 4000）", _settings.ReadRareSingleCharThreshold(), 0, 50000, 500, 700);
+        var continuation = AddSwitchRow(card, "日语续输锁定", "前段选中日语后，剩余编码只匹配日语；新输入仍为中日混输", "", values.JapaneseContinuationLock, 770);
+        var fuzzy = AddSwitchRow(card, "日语模糊匹配（总开关）", "只启用下方已勾选的容错规则", "Ctrl + Alt + F", values.Fuzzy, 840);
+        var sokuon = AddSwitchRow(card, "　促音省略", "kitte 输入 kite 也能匹配", "", values.FuzzySokuon, 910);
+        var longI = AddSwitchRow(card, "　长音 い", "省略表示长音的 i 也能匹配", "", values.FuzzyLongI, 965);
+        var longU = AddSwitchRow(card, "　长音 う", "省略表示长音的 u 也能匹配", "", values.FuzzyLongU, 1020);
+        var longMark = AddSwitchRow(card, "　片假名长音 ー", "例如 kopii 也能匹配 コピー", "", values.FuzzyLongMark, 1075);
+        var chiJi = AddSwitchRow(card, "　ち / じ", "chi 与 ji 可互相容错匹配", "", values.FuzzyChiJi, 1130);
+        var huFu = AddSwitchRow(card, "　ふ：hu / fu", "词首或词中 hu 与 fu 可互相容错", "", values.FuzzyHuFu, 1185);
+        var shuSho = AddSwitchRow(card, "　しゅ / しょ", "shu 与 sho 可互相容错匹配", "", values.FuzzyShuSho, 1240);
+        var keKai = AddSwitchRow(card, "　け / かい：ke / kai", "例如 seke 也能匹配 世界（sekai）", "", values.FuzzyKeKai, 1295);
+        var keKaeGae = AddSwitchRow(card, "　ke / kae / gae", "例如 kikeru 也能匹配 着替える（kigaeru）", "", values.FuzzyKeKaeGae, 1350);
+        var seiSai = AddSwitchRow(card, "　せい / さい：sei / sai", "sei 与 sai 可互相容错匹配", "", values.FuzzySeiSai, 1405);
+        var dakuten = AddSwitchRow(card, "　浊音 / 半浊音", "t/d、p/b/h 容错，可与促音组合", "", values.FuzzyDakuten, 1460);
+        var apply = PrimaryButton("应用设置", 24, 1525, 118);
         async Task SaveAndApplyAsync(bool deploy)
         {
             // Persist before the first await so navigating to another page can
             // never recreate these switches from stale values.
             _settings.SaveInputOptions(new InputOptions(
-                en.Checked, ja.Checked, spaceSelectFirst.Checked, expandedCommentWidth.Checked, fuzzy.Checked,
+                en.Checked, ja.Checked, inlinePreedit.Checked, inlineRaw.Checked,
+                enterSubmitsToApp.Checked, spaceSelectFirst.Checked, spaceReading.Checked, longPressReading.Checked,
+                expandedCommentWidth.Checked, continuation.Checked, fuzzy.Checked,
                 sokuon.Checked, longI.Checked, longU.Checked,
                 longMark.Checked, chiJi.Checked, huFu.Checked,
                 shuSho.Checked, keKai.Checked, keKaeGae.Checked,
@@ -644,7 +653,7 @@ internal sealed class MainForm : Form
         }
         en.CheckedChanged += SaveImmediately;
         ja.CheckedChanged += SaveImmediately;
-        spaceSelectFirst.CheckedChanged += async (_, _) =>
+        async void InlineStyleChanged(object? sender, EventArgs e)
         {
             try
             {
@@ -660,7 +669,51 @@ internal sealed class MainForm : Form
                     apply.Enabled = true;
                 }
             }
-        };
+        }
+        inlinePreedit.CheckedChanged += InlineStyleChanged;
+        inlineRaw.CheckedChanged += InlineStyleChanged;
+        enterSubmitsToApp.CheckedChanged += InlineStyleChanged;
+        bool changingSpaceMode = false;
+        async void SpaceModeChanged(object? sender, EventArgs e)
+        {
+            if (changingSpaceMode || sender is not ToggleSwitch selected)
+                return;
+            // This is a radio group presented with the app's switch controls:
+            // one mode must always remain selected.
+            if (!selected.Checked)
+            {
+                if (!spaceRaw.Checked && !spaceSelectFirst.Checked && !spaceReading.Checked)
+                {
+                    changingSpaceMode = true;
+                    selected.Checked = true;
+                    changingSpaceMode = false;
+                }
+                return;
+            }
+            try
+            {
+                changingSpaceMode = true;
+                spaceRaw.Checked = ReferenceEquals(selected, spaceRaw);
+                spaceSelectFirst.Checked = ReferenceEquals(selected, spaceSelectFirst);
+                spaceReading.Checked = ReferenceEquals(selected, spaceReading);
+                apply.Text = "正在部署…";
+                apply.Enabled = false;
+                await SaveAndApplyAsync(true);
+            }
+            finally
+            {
+                if (!apply.IsDisposed)
+                {
+                    apply.Text = "已生效";
+                    apply.Enabled = true;
+                }
+                changingSpaceMode = false;
+            }
+        }
+        spaceRaw.CheckedChanged += SpaceModeChanged;
+        spaceSelectFirst.CheckedChanged += SpaceModeChanged;
+        spaceReading.CheckedChanged += SpaceModeChanged;
+        longPressReading.CheckedChanged += SaveImmediately;
         expandedCommentWidth.CheckedChanged += async (_, _) =>
         {
             try
@@ -678,6 +731,7 @@ internal sealed class MainForm : Form
                 }
             }
         };
+        continuation.CheckedChanged += SaveImmediately;
         fuzzy.CheckedChanged += SaveImmediately;
         sokuon.CheckedChanged += SaveImmediately;
         longI.CheckedChanged += SaveImmediately;

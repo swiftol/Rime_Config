@@ -3,11 +3,14 @@ using System.IO;
 using System.Drawing;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.Win32;
 
 namespace RimeSettings;
 
 internal sealed record InputOptions(
-    bool English, bool Japanese, bool SpaceSelectFirst, bool ExpandedCommentWidth, bool Fuzzy,
+    bool English, bool Japanese, bool InlinePreedit, bool InlinePreeditRawInput,
+    bool EnterSubmitsToApp, bool SpaceSelectFirst, bool SpaceReadingPreview, bool LongPressReadingPreview,
+    bool ExpandedCommentWidth, bool JapaneseContinuationLock, bool Fuzzy,
     bool FuzzySokuon, bool FuzzyLongI, bool FuzzyLongU,
     bool FuzzyLongMark, bool FuzzyChiJi, bool FuzzyHuFu,
     bool FuzzyShuSho, bool FuzzyKeKai, bool FuzzyKeKaeGae,
@@ -33,8 +36,14 @@ internal sealed class SettingsStore
     public InputOptions ReadInputOptions() => new(
         ReadOption("show_english_annotation", true),
         ReadOption("show_japanese_annotation", true),
+        ReadPatchBool("style/inline_preedit", true),
+        ReadPatchBool("style/inline_preedit_raw_input", true),
+        ReadSchemaPatchBool("space_commit_raw/enter_submits_to_app", false),
         ReadSchemaPatchBool("space_commit_raw/select_first", false),
+        ReadSchemaPatchBool("space_commit_raw/reading_preview", false),
+        ReadRegistryBool("LongPressReadingPreview", false),
         ReadPatchBool("style/expanded_comment_width", true),
+        ReadOption("japanese_continuation_lock", true),
         ReadOption("japanese_fuzzy_match", false),
         ReadOption("japanese_fuzzy_sokuon", true),
         ReadOption("japanese_fuzzy_long_i", true),
@@ -62,6 +71,7 @@ internal sealed class SettingsStore
         }
         text = SetOption(text, "show_english_annotation", options.English);
         text = SetOption(text, "show_japanese_annotation", options.Japanese);
+        text = SetOption(text, "japanese_continuation_lock", options.JapaneseContinuationLock);
         text = SetOption(text, "japanese_fuzzy_match", options.Fuzzy);
         text = SetOption(text, "japanese_fuzzy_sokuon", options.FuzzySokuon);
         text = SetOption(text, "japanese_fuzzy_long_i", options.FuzzyLongI);
@@ -84,18 +94,45 @@ internal sealed class SettingsStore
             schemaText = schemaText.TrimEnd() + "\n\npatch:\n";
         schemaText = SetPatchBool(schemaText, "space_commit_raw/select_first",
                                   options.SpaceSelectFirst);
+        schemaText = SetPatchBool(schemaText, "space_commit_raw/enter_submits_to_app",
+                                  options.EnterSubmitsToApp);
+        schemaText = SetPatchBool(schemaText, "space_commit_raw/reading_preview",
+                                  options.SpaceReadingPreview);
         File.WriteAllText(JapaneseSchemaCustomYaml, schemaText.TrimEnd() + "\n",
                           new UTF8Encoding(false));
+
+        // TSF must know the mode before Rime processes the Space key.  A small
+        // per-user registry value avoids file IO on every keystroke.
+        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Rime\Weasel"))
+        {
+            key?.SetValue("SpaceReadingPreview", options.SpaceReadingPreview ? 1 : 0,
+                          RegistryValueKind.DWord);
+            key?.SetValue("LongPressReadingPreview",
+                          options.LongPressReadingPreview ? 1 : 0,
+                          RegistryValueKind.DWord);
+            key?.SetValue("EnterSubmitsToApp", options.EnterSubmitsToApp ? 1 : 0,
+                          RegistryValueKind.DWord);
+        }
 
         var weaselText = File.Exists(WeaselCustomYaml)
             ? File.ReadAllText(WeaselCustomYaml, Encoding.UTF8)
             : "patch:\n";
         if (!Regex.IsMatch(weaselText, @"(?m)^patch:\s*$"))
             weaselText = weaselText.TrimEnd() + "\n\npatch:\n";
+        weaselText = SetPatchBool(weaselText, "style/inline_preedit",
+                                  options.InlinePreedit);
+        weaselText = SetPatchBool(weaselText, "style/inline_preedit_raw_input",
+                                  options.InlinePreeditRawInput);
         weaselText = SetPatchBool(weaselText, "style/expanded_comment_width",
                                   options.ExpandedCommentWidth);
         File.WriteAllText(WeaselCustomYaml, weaselText.TrimEnd() + "\n",
                           new UTF8Encoding(false));
+    }
+
+    private static bool ReadRegistryBool(string name, bool fallback)
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(@"Software\Rime\Weasel");
+        return key?.GetValue(name) is int value ? value != 0 : fallback;
     }
 
     public int ReadRareSingleCharThreshold()

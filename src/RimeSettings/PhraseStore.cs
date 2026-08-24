@@ -16,6 +16,7 @@ internal sealed class PhraseStore
 
     public string RimeDirectory { get; }
     public string PhraseFile => Path.Combine(RimeDirectory, "custom_phrase.txt");
+    public string PhraseDataFile => Path.Combine(RimeDirectory, "lua", "common_phrase_data.lua");
 
     public PhraseStore()
     {
@@ -61,13 +62,37 @@ internal sealed class PhraseStore
             original = original.Remove(start, end - start).TrimEnd();
         }
 
-        var rows = phrases
+        var cleaned = phrases
             .Select(p => new CommonPhrase(Clean(p.Content), CleanCode(p.Code), p.Weight))
             .Where(p => p.Content.Length > 0 && p.Code.Length > 0)
-            .Select(p => $"{p.Content}\t{p.Code}\t{p.Weight}");
+            .ToList();
+        var rows = cleaned.Select(p => $"{p.Content}\t{p.Code}\t{p.Weight}");
         var block = StartMarker + "\n" + string.Join("\n", rows) + "\n" + EndMarker;
         File.WriteAllText(PhraseFile, original.TrimEnd() + "\n\n" + block + "\n", new UTF8Encoding(false));
+        WriteLuaData(cleaned);
     }
+
+    private void WriteLuaData(IReadOnlyCollection<CommonPhrase> phrases)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(PhraseDataFile)!);
+        var groups = phrases
+            .GroupBy(p => p.Code, StringComparer.OrdinalIgnoreCase)
+            .Select(g => new { Code = g.Key.ToLowerInvariant(), Items = g.Select(p => p.Content).Distinct().ToList() });
+        var lines = new List<string> { "return {" };
+        foreach (var group in groups)
+        {
+            var values = string.Join(", ", group.Items.Select(v => $"\"{LuaEscape(v)}\""));
+            lines.Add($"  [\"{LuaEscape(group.Code)}\"] = {{ {values} }},");
+        }
+        lines.Add("}");
+        File.WriteAllText(PhraseDataFile, string.Join("\n", lines) + "\n", new UTF8Encoding(false));
+    }
+
+    private static string LuaEscape(string value) => value
+        .Replace("\\", "\\\\")
+        .Replace("\"", "\\\"")
+        .Replace("\r", "\\r")
+        .Replace("\n", "\\n");
 
     private static string Clean(string value) =>
         value.Replace('\t', ' ').Replace("\r", " ").Replace("\n", " ").Trim();

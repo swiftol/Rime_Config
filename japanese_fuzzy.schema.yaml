@@ -86,6 +86,10 @@ speller:
     # Common unvoiced/voiced and semi-voiced substitutions.  These rules are
     # intentionally general, so shuppatsu can be found from shubatsu without
     # hard-coding 出発.
+    # Keep k/g correction syllable-scoped so it affects Japanese ga/ka only
+    # and cannot rewrite arbitrary Chinese pinyin consonants.
+    - derive/ga/ka/
+    - derive/ka/ga/
 
 translator:
   dictionary: japanese

@@ -1,5 +1,12 @@
 # Build artifacts
 build/
+bin/
+obj/
+outputs/
+installer/output/
+installer/payload/
+installer/publish-settings/
+installer/RimeUserBootstrap.exe
 *.table.bin
 *.prism.bin
 *.reverse.bin
