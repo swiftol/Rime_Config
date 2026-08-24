@@ -1,5 +1,5 @@
 #define MyAppName "雾凇拼音·中日混输输入法"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "swiftol"
 
 [Setup]
@@ -11,7 +11,7 @@ DefaultDirName={autopf}\RimeChineseJapanese
 DefaultGroupName={#MyAppName}
 UninstallDisplayName={#MyAppName}
 OutputDir=output
-OutputBaseFilename=Rime-Chinese-Japanese-1.0.0-Setup
+OutputBaseFilename=Rime-Chinese-Japanese-1.0.1-Setup
 Compression=lzma2/fast
 SolidCompression=yes
 LZMAUseSeparateProcess=yes
@@ -53,7 +53,7 @@ Filename: "{app}\WeaselSetup.exe"; Parameters: "/s"; StatusMsg: "正在注册输
 Filename: "{app}\RimeUserBootstrap.exe"; Parameters: """{app}"" --quiet"; StatusMsg: "正在更新配置并编译中日词库，请勿关闭……"; Flags: waituntilterminated runasoriginaluser
 
 [Registry]
-Root: HKLM; Subkey: "SOFTWARE\Microsoft\Active Setup\Installed Components\{{F3D82154-C12E-478D-B7DA-D755D5BC39EA}"; ValueType: string; ValueName: "Version"; ValueData: "1,0,0,0"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Active Setup\Installed Components\{{F3D82154-C12E-478D-B7DA-D755D5BC39EA}"; ValueType: string; ValueName: "Version"; ValueData: "1,0,1,0"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Active Setup\Installed Components\{{F3D82154-C12E-478D-B7DA-D755D5BC39EA}"; ValueType: string; ValueName: "StubPath"; ValueData: """{app}\RimeUserBootstrap.exe"" ""{app}"" --quiet"; Flags: uninsdeletevalue
 
 [UninstallRun]

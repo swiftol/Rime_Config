@@ -45,4 +45,4 @@ $compiler = 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
 if (!(Test-Path $compiler)) { throw "Inno Setup compiler not found: $compiler" }
 & $compiler (Join-Path $PSScriptRoot 'RimeChineseJapanese.iss')
 if ($LASTEXITCODE -ne 0) { throw 'Installer build failed.' }
-Write-Host (Join-Path $PSScriptRoot 'output\Rime-Chinese-Japanese-1.0.0-Setup.exe')
+Write-Host (Join-Path $PSScriptRoot 'output\Rime-Chinese-Japanese-1.0.1-Setup.exe')

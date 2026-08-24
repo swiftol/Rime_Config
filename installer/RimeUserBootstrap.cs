@@ -7,7 +7,7 @@ using Microsoft.Win32;
 
 internal static class Program
 {
-    private const string Version = "1.0.0";
+    private const string Version = "1.0.1";
     private static string _logFile = "";
 
     private static void Log(string message)
@@ -65,6 +65,30 @@ internal static class Program
             File.Copy(userDbFile, Path.Combine(target, Path.GetFileName(userDbFile)), true);
     }
 
+    private static void NormalizeSelectedSchema(string target)
+    {
+        string path = Path.Combine(target, "user.yaml");
+        if (!File.Exists(path)) return;
+        string text = File.ReadAllText(path, Encoding.UTF8);
+        var pattern = new System.Text.RegularExpressions.Regex(
+            @"(?m)^(\s*previously_selected_schema:\s*).*$");
+        if (pattern.IsMatch(text))
+            text = pattern.Replace(text, "$1rime_ice_japanese", 1);
+        File.WriteAllText(path, text, new UTF8Encoding(false));
+    }
+
+    private static bool CanReuseBuild(string backup, string stateDir)
+    {
+        if (String.IsNullOrEmpty(backup) || !File.Exists(Path.Combine(stateDir, "configured-1.0.0.txt")))
+            return false;
+        string build = Path.Combine(backup, "build");
+        return File.Exists(Path.Combine(build, "rime_ice_japanese.schema.yaml")) &&
+               File.Exists(Path.Combine(build, "rime_ice_japanese_chinese_exact.prism.bin")) &&
+               File.Exists(Path.Combine(build, "rime_ice.table.bin")) &&
+               File.Exists(Path.Combine(build, "japanese.prism.bin")) &&
+               File.Exists(Path.Combine(build, "japanese.table.bin"));
+    }
+
     private static int RunWithProgress(string file, string args, int timeoutMinutes)
     {
         var info = new ProcessStartInfo(file, args) { UseShellExecute = false, CreateNoWindow = true };
@@ -119,23 +143,36 @@ internal static class Program
             string backup = null;
             if (Directory.Exists(rimeDir))
             {
-                backup = Path.Combine(Path.GetDirectoryName(rimeDir), "Rime_Backup_before_CNJP_1_0_" + DateTime.Now.ToString("yyyyMMdd_HHmmss"));
+                backup = Path.Combine(Path.GetDirectoryName(rimeDir), "Rime_Backup_before_CNJP_1_0_1_" + DateTime.Now.ToString("yyyyMMdd_HHmmss"));
                 Directory.Move(rimeDir, backup);
-                string oldBuild = Path.Combine(backup, "build");
-                if (Directory.Exists(oldBuild)) try { Directory.Delete(oldBuild, true); } catch { }
                 File.WriteAllText(Path.Combine(stateDir, "last-backup.txt"), backup, new UTF8Encoding(false));
                 Log("原配置已备份：" + backup);
             }
 
             CopyDirectory(template, rimeDir);
             RestorePersonalData(backup, rimeDir);
+            NormalizeSelectedSchema(rimeDir);
+            if (CanReuseBuild(backup, stateDir))
+            {
+                string oldBuild = Path.Combine(backup, "build");
+                string newBuild = Path.Combine(rimeDir, "build");
+                if (Directory.Exists(newBuild)) Directory.Delete(newBuild, true);
+                Directory.Move(oldBuild, newBuild);
+                Log("检测到 1.0.0 有效编译缓存，本次升级执行增量部署。");
+            }
+            else
+            {
+                string oldBuild = String.IsNullOrEmpty(backup) ? "" : Path.Combine(backup, "build");
+                if (Directory.Exists(oldBuild)) try { Directory.Delete(oldBuild, true); } catch { }
+                Log("首次安装或缓存不可复用，将完整编译中日词库。");
+            }
             Log("项目配置已更新，个人词频、常用语和同步数据已保留。");
 
             int exit = RunWithProgress(deployer, "/deploy", 45);
             if (exit != 0) throw new InvalidOperationException("部署器退出代码：" + exit);
-            File.WriteAllText(Path.Combine(stateDir, "configured-1.0.0.txt"), DateTime.Now.ToString("o"), new UTF8Encoding(false));
+            File.WriteAllText(Path.Combine(stateDir, "configured-1.0.1.txt"), DateTime.Now.ToString("o"), new UTF8Encoding(false));
             if (File.Exists(server)) Process.Start(new ProcessStartInfo(server) { UseShellExecute = true });
-            Log("V1.0.0 部署完成，无需重启电脑。");
+            Log("V1.0.1 部署完成，无需重启电脑。");
             if (!quiet) { Console.WriteLine("安装完成，按 Enter 关闭窗口。"); Console.ReadLine(); }
             return 0;
         }
