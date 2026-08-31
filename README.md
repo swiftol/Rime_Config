@@ -1,6 +1,17 @@
 # Rime 中日直输 1.1
 
+[简体中文](./README.md) | [English](./README_EN.md)
+
+[![GitHub Release](https://img.shields.io/github/v/release/swiftol/Rime_Config?label=release)](https://github.com/swiftol/Rime_Config/releases/latest)
+[![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?logo=windows)](https://github.com/swiftol/Rime_Config/releases/latest)
+[![License](https://img.shields.io/github/license/swiftol/Rime_Config)](./LICENSE)
+[![Privacy](https://img.shields.io/badge/privacy-local--first-19a974)](./docs/PRIVACY.md)
+
 基于小狼毫（Weasel）与雾凇拼音的 Windows 中日混输输入法。中文拼音和日语罗马字可以直接混输，无需日语前缀。
+
+![中日混输候选窗安全合成演示](./docs/media/mixed-input-demo.gif)
+
+> 演示动画由公开示例词合成，不是桌面截图，不包含账号、文件名、个人词库或真实输入记录。
 
 ## 项目特点
 
@@ -38,15 +49,28 @@
 
 设置面板可修改翻译注释、日语模糊匹配、中文模糊纠错、候选外观、生僻字过滤和空格键行为。修改后点击“应用设置”；需要重新编译词库的设置会自动重新部署。
 
+![图形化设置面板安全合成预览](./docs/media/settings-preview.png)
+
 ## 隐私
 
 输入法在本机离线运行，不需要登录账号，也不会上传输入文本、选词记录或个人输入习惯。项目发布包只提供软件运行所需的公共配置与词库。
+
+详细的数据边界和公开图片规则见 [隐私说明](./docs/PRIVACY.md)。
 
 ## 版本与更新
 
 - 最新稳定版：[Rime 中日直输 1.1.0](https://github.com/swiftol/Rime_Config/releases/latest)
 - 历史安装包：[全部 Releases](https://github.com/swiftol/Rime_Config/releases)
 - 详细改动：[CHANGELOG.md](./CHANGELOG.md)
+
+## 测试与质量保证
+
+项目同时进行配置/词典检查、独立引擎候选测试和 Windows 原生 TSF 输入测试。发布前还会验证干净安装、历史版本升级、个人数据保留、冷启动日语长音和新宿主进程实际加载的输入法组件。
+
+- [公开测试规范](./docs/TESTING.md)
+- [项目架构](./docs/ARCHITECTURE.md)
+- [发布与打包检查清单](./installer/RELEASE-PACKAGING-CHECKLIST.md)
+- [参与贡献](./CONTRIBUTING.md)
 
 
 

@@ -1,0 +1,24 @@
+name: 功能建议
+description: 建议新的输入行为、候选显示或设置能力
+title: "[Feature] "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 使用场景
+      description: 现在遇到了什么问题？请尽量使用虚构示例，不要填写个人常用语。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案
+    validations:
+      required: true
+  - type: textarea
+    id: examples
+    attributes:
+      label: 输入与候选示例
+      placeholder: 输入码 → 期望候选

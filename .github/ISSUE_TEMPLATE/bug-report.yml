@@ -1,0 +1,54 @@
+name: Bug 报告
+description: 报告可复现的输入、候选窗、安装或设置问题
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。请勿上传包含桌面、任务栏、账号、文件名、个人输入记录、本机路径或日志隐私的截图；图片应只保留软件界面。
+  - type: input
+    id: version
+    attributes:
+      label: 软件版本
+      placeholder: 例如 1.1.0
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows 版本
+      placeholder: 例如 Windows 11 24H2
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 请写明输入码、按键顺序、是否展开候选窗，以及是否启用模糊匹配。
+      placeholder: |
+        1. 打开一个新的原生文本框
+        2. 输入 ...
+        3. 按下 ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望结果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: 隐私确认
+      options:
+        - label: 我已检查附件，不含账号、桌面、个人输入、文件名、本机路径或其他私人信息。
+          required: true
