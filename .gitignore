@@ -7,6 +7,9 @@ installer/output/
 installer/payload/
 installer/publish-settings/
 installer/RimeUserBootstrap.exe
+installer/RimeCandidateSelfTest.exe
+installer/RimeImportProbe.exe
+*.obj
 *.table.bin
 *.prism.bin
 *.reverse.bin
@@ -22,6 +25,8 @@ installation.yaml
 sync/
 clipboard/
 custom_phrase.txt
+custom_japanese_fuzzy.tsv
+custom_chinese_fuzzy.tsv
 lua/common_phrase_data.lua
 
 # Local backups and generated personal-state snapshots

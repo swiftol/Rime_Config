@@ -1,25 +1,43 @@
 param([Parameter(Mandatory = $true)][string]$InstallRoot)
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Continue'
 $stateDir = Join-Path $env:ProgramData 'RimeChineseJapanese'
 $logFile = Join-Path $stateDir 'runtime-cleanup.log'
 New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
-function Write-CleanupLog([string]$Message) { Add-Content -LiteralPath $logFile -Encoding UTF8 -Value ("{0}  {1}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $Message) }
-function Get-OldWeaselRoot {
-    foreach ($key in @('HKLM:\SOFTWARE\WOW6432Node\Rime\Weasel', 'HKLM:\SOFTWARE\Rime\Weasel')) {
-        if (Test-Path -LiteralPath $key) { $value=(Get-ItemProperty -LiteralPath $key -ErrorAction SilentlyContinue).WeaselRoot; if($value){return [string]$value} }
-    }
-    return $null
+function Log([string]$text) { Add-Content -LiteralPath $logFile -Encoding UTF8 -Value ("{0}  {1}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'),$text) }
+function Normalize([string]$path) { if(!$path){return ''}; try{return [IO.Path]::GetFullPath($path).TrimEnd('\')}catch{return ''} }
+function Is-ProductRoot([string]$path) {
+    $full=Normalize $path; if(!$full){return $false}
+    $leaf=[IO.Path]::GetFileName($full)
+    return ($leaf -eq 'RimeChineseJapanese' -or $leaf -match '^weasel-[0-9]') -and
+        (Test-Path -LiteralPath (Join-Path $full 'WeaselSetup.exe'))
 }
-function Test-SafeWeaselRoot([string]$Path) {
-    if(!$Path){return $false}; try{$full=[IO.Path]::GetFullPath($Path).TrimEnd('\')}catch{return $false}
-    if($full -match '^[A-Za-z]:$' -or [IO.Path]::GetFileName($full) -notmatch '^weasel-[0-9]'){return $false}
-    return (Test-Path -LiteralPath (Join-Path $full 'WeaselServer.exe')) -and (Test-Path -LiteralPath (Join-Path $full 'rime.dll'))
+function Run-Bounded([string]$exe,[string]$args,[int]$seconds) {
+    try {
+        $p=Start-Process -FilePath $exe -ArgumentList $args -PassThru -WindowStyle Hidden
+        if(!$p.WaitForExit($seconds*1000)){ try{$p.Kill()}catch{}; Log "Timed out: $exe $args"; return -1 }
+        Log "Exit $($p.ExitCode): $exe $args"; return $p.ExitCode
+    } catch { Log "Failed: $exe $args : $($_.Exception.Message)"; return -2 }
 }
-function Register-DeleteOnReboot([string]$Path) {
-    $command='"{0}" /d /c rd /s /q "{1}"' -f $env:ComSpec,$Path
-    New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce' -Name 'RimeCNJPRemoveOldRuntime' -PropertyType String -Value $command -Force|Out-Null
-    Write-CleanupLog "旧目录仍有被占用文件，已登记下次开机自动删除：$Path"
+$newRoot=Normalize $InstallRoot
+$roots=New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+foreach($view in @([Microsoft.Win32.RegistryView]::Registry32,[Microsoft.Win32.RegistryView]::Registry64)){
+    try{
+        $base=[Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::LocalMachine,$view)
+        $key=$base.OpenSubKey('SOFTWARE\Rime\Weasel')
+        if($key){$value=[string]$key.GetValue('WeaselRoot'); if($value){[void]$roots.Add((Normalize $value))};$key.Dispose()}
+        $base.Dispose()
+    }catch{}
 }
-$oldRoot=Get-OldWeaselRoot; $newRoot=[IO.Path]::GetFullPath($InstallRoot).TrimEnd('\'); Write-CleanupLog "旧目录：$oldRoot；新目录：$newRoot"
-if($oldRoot -and (Test-SafeWeaselRoot $oldRoot)){$oldFull=[IO.Path]::GetFullPath($oldRoot).TrimEnd('\');if(![string]::Equals($oldFull,$newRoot,[StringComparison]::OrdinalIgnoreCase)){$oldSetup=Join-Path $oldFull 'WeaselSetup.exe';if(Test-Path -LiteralPath $oldSetup){try{Start-Process -FilePath $oldSetup -ArgumentList '/u' -Wait -WindowStyle Hidden}catch{}};try{Remove-Item -LiteralPath $oldFull -Recurse -Force}catch{Register-DeleteOnReboot $oldFull}}}
-$uninstallKey='HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Weasel';if(Test-Path -LiteralPath $uninstallKey){$u=[string](Get-ItemProperty -LiteralPath $uninstallKey -ErrorAction SilentlyContinue).UninstallString;if(!$oldRoot -or $u -like "*$oldRoot*"){Remove-Item -LiteralPath $uninstallKey -Recurse -Force -ErrorAction SilentlyContinue}}
+foreach($known in @('C:\Program Files\RimeChineseJapanese','C:\Program Files (x86)\RimeChineseJapanese','D:\RimeChineseJapanese','H:\RimeChineseJapanese')){
+    if(Test-Path -LiteralPath $known){[void]$roots.Add((Normalize $known))}
+}
+Get-Process WeaselServer,WeaselDeployer,WeaselSetup -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Start-Sleep -Milliseconds 700
+foreach($root in $roots){
+    if(!$root -or [string]::Equals($root,$newRoot,[StringComparison]::OrdinalIgnoreCase)){continue}
+    if(!(Is-ProductRoot $root)){Log "Skipped unrecognized root: $root";continue}
+    Run-Bounded (Join-Path $root 'WeaselSetup.exe') '/u' 12 | Out-Null
+    Get-Process WeaselServer,WeaselDeployer,WeaselSetup -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    try{Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction Stop;Log "Removed old runtime: $root"}catch{Log "Could not remove old runtime: $root : $($_.Exception.Message)"}
+}
+Log "Legacy cleanup finished; current runtime: $newRoot"

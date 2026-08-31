@@ -7,7 +7,7 @@ using Microsoft.Win32;
 
 internal static class Program
 {
-    private const string Version = "1.0.1";
+    private const string Version = "1.1.0";
     private static string _logFile = "";
 
     private static void Log(string message)
@@ -48,7 +48,7 @@ internal static class Program
             string source = Path.Combine(backup, directoryName);
             if (Directory.Exists(source)) CopyDirectory(source, Path.Combine(target, directoryName));
         }
-        foreach (string name in new[] { "custom_phrase.txt", "user.yaml", "installation.yaml" })
+        foreach (string name in new[] { "custom_phrase.txt", "custom_japanese_fuzzy.tsv", "custom_chinese_fuzzy.tsv", "user.yaml", "installation.yaml" })
         {
             string source = Path.Combine(backup, name);
             if (File.Exists(source)) File.Copy(source, Path.Combine(target, name), true);
@@ -79,35 +79,77 @@ internal static class Program
 
     private static bool CanReuseBuild(string backup, string stateDir)
     {
-        if (String.IsNullOrEmpty(backup) || !File.Exists(Path.Combine(stateDir, "configured-1.0.0.txt")))
-            return false;
-        string build = Path.Combine(backup, "build");
-        return File.Exists(Path.Combine(build, "rime_ice_japanese.schema.yaml")) &&
-               File.Exists(Path.Combine(build, "rime_ice_japanese_chinese_exact.prism.bin")) &&
-               File.Exists(Path.Combine(build, "rime_ice.table.bin")) &&
-               File.Exists(Path.Combine(build, "japanese.prism.bin")) &&
-               File.Exists(Path.Combine(build, "japanese.table.bin"));
+        // V1.0.2 is the compatibility reset release.  Builds produced by the
+        // many pre-1.0 layouts are not safe to reuse even when all expected
+        // filenames happen to exist.
+        return false;
     }
 
-    private static int RunWithProgress(string file, string args, int timeoutMinutes)
+    private static int RunWithProgress(string file, string args, int timeoutMinutes, string buildDir)
     {
         var info = new ProcessStartInfo(file, args) { UseShellExecute = false, CreateNoWindow = true };
         using (var process = Process.Start(info))
         {
             DateTime started = DateTime.Now;
+            TimeSpan previousCpu = TimeSpan.Zero;
+            DateTime nextDetail = started;
             while (!process.WaitForExit(2000))
             {
                 TimeSpan elapsed = DateTime.Now - started;
-                Console.Write("\r正在编译中日词库：{0:mm\\:ss}（首次安装可能需要数分钟）", elapsed);
+                if (DateTime.Now >= nextDetail)
+                {
+                    try { process.Refresh(); } catch { }
+                    TimeSpan cpu = TimeSpan.Zero;
+                    try { cpu = process.TotalProcessorTime; } catch { }
+                    long buildBytes = 0; int buildFiles = 0;
+                    try
+                    {
+                        if (Directory.Exists(buildDir))
+                            foreach (string path in Directory.GetFiles(buildDir, "*", SearchOption.AllDirectories))
+                            { buildFiles++; try { buildBytes += new FileInfo(path).Length; } catch { } }
+                    }
+                    catch { }
+                    string activity = cpu > previousCpu ? "运行中" : "等待磁盘/文件锁";
+                    Console.WriteLine("部署进度 {0:mm\\:ss}：{1}，CPU {2:F1}s，已生成 {3} 个文件/{4:F1} MB",
+                        elapsed, activity, cpu.TotalSeconds, buildFiles, buildBytes / 1048576.0);
+                    previousCpu = cpu;
+                    nextDetail = DateTime.Now.AddSeconds(10);
+                }
                 if (elapsed.TotalMinutes >= timeoutMinutes)
                 {
                     try { process.Kill(); } catch { }
-                    Console.WriteLine();
+                    Log("部署超过 " + timeoutMinutes + " 分钟，已停止部署器，防止无限卡住。");
                     return -2;
                 }
             }
-            Console.WriteLine();
             return process.ExitCode;
+        }
+    }
+
+    private static bool RunCandidateSelfTest(string installRoot, string rimeDir)
+    {
+        string tester = Path.Combine(installRoot, "RimeCandidateSelfTest.exe");
+        if (!File.Exists(tester))
+            throw new InvalidOperationException("安装包缺少真实候选自测程序。");
+        var info = new ProcessStartInfo(tester,
+            "\"" + installRoot + "\" \"" + rimeDir + "\"")
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+        using (var process = Process.Start(info))
+        {
+            string output = process.StandardOutput.ReadToEnd();
+            string error = process.StandardError.ReadToEnd();
+            process.WaitForExit(120000);
+            File.WriteAllText(Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "RimeChineseJapanese", "candidate-selftest.log"),
+                output + Environment.NewLine + error, new UTF8Encoding(false));
+            Log("真实候选自测退出代码：" + process.ExitCode);
+            return process.ExitCode == 0 && output.Contains("CANDIDATE_1=");
         }
     }
 
@@ -143,7 +185,7 @@ internal static class Program
             string backup = null;
             if (Directory.Exists(rimeDir))
             {
-                backup = Path.Combine(Path.GetDirectoryName(rimeDir), "Rime_Backup_before_CNJP_1_0_1_" + DateTime.Now.ToString("yyyyMMdd_HHmmss"));
+                backup = Path.Combine(Path.GetDirectoryName(rimeDir), "Rime_Backup_before_CNJP_1_1_0_" + DateTime.Now.ToString("yyyyMMdd_HHmmss"));
                 Directory.Move(rimeDir, backup);
                 File.WriteAllText(Path.Combine(stateDir, "last-backup.txt"), backup, new UTF8Encoding(false));
                 Log("原配置已备份：" + backup);
@@ -168,11 +210,23 @@ internal static class Program
             }
             Log("项目配置已更新，个人词频、常用语和同步数据已保留。");
 
-            int exit = RunWithProgress(deployer, "/deploy", 45);
+            int exit = RunWithProgress(deployer, "/deploy", 15, Path.Combine(rimeDir, "build"));
             if (exit != 0) throw new InvalidOperationException("部署器退出代码：" + exit);
-            File.WriteAllText(Path.Combine(stateDir, "configured-1.0.1.txt"), DateTime.Now.ToString("o"), new UTF8Encoding(false));
+            if (!RunCandidateSelfTest(installRoot, rimeDir))
+            {
+                Log("增量部署未能产生真实候选，自动清除编译缓存并完整重编。");
+                string build = Path.Combine(rimeDir, "build");
+                if (Directory.Exists(build)) Directory.Delete(build, true);
+                exit = RunWithProgress(deployer, "/deploy", 15, Path.Combine(rimeDir, "build"));
+                if (exit != 0) throw new InvalidOperationException("完整重编退出代码：" + exit);
+                if (!RunCandidateSelfTest(installRoot, rimeDir))
+                    throw new InvalidOperationException(
+                        "真实候选自测失败：输入 nihao 后没有得到候选。请发送 candidate-selftest.log。");
+            }
+            Log("真实候选自测通过：nihao 已产生候选。");
+            File.WriteAllText(Path.Combine(stateDir, "configured-1.1.0.txt"), DateTime.Now.ToString("o"), new UTF8Encoding(false));
             if (File.Exists(server)) Process.Start(new ProcessStartInfo(server) { UseShellExecute = true });
-            Log("V1.0.1 部署完成，无需重启电脑。");
+            Log("V1.1.0 部署完成，无需重启电脑。");
             if (!quiet) { Console.WriteLine("安装完成，按 Enter 关闭窗口。"); Console.ReadLine(); }
             return 0;
         }

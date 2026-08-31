@@ -1,5 +1,5 @@
 # Rime table
-#@/db_name builtin_shortcuts.txt
-#@/db_type tabledb
+#@/db_name	builtin_shortcuts.txt
+#@/db_type	tabledb
 # 内置稳定快捷词；不要在此加入整套单字母表，以免污染中文简拼。
 了	l	100

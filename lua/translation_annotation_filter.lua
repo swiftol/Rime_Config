@@ -2,6 +2,7 @@
 local RS = string.char(30)
 local EN = RS .. "EN:"
 local JA = RS .. "JA:"
+local HIDDEN_CHINESE_COMMENT = "[[RIME_LANG:ZH]]"
 -- Do not use an ASCII control character here: the Weasel IPC escaping layer
 -- can discard it and expose a bare `JR:` suffix.  This textual envelope is
 -- removed by Weasel before painting and survives every serialization path.
@@ -146,7 +147,30 @@ local function build_comment(en, ja, show_en, show_ja)
   return result
 end
 
-local COMMON_PHRASES = require("common_phrase_data")
+local function allow_annotation_for_text(text, show_single_character)
+  if show_single_character then return true end
+  local ok, length = pcall(utf8.len, text or "")
+  return not ok or length ~= 1
+end
+
+local function visible_or_hidden_comment(text, en, ja, show_en, show_ja,
+                                         show_single_character)
+  if not allow_annotation_for_text(text, show_single_character) then
+    return HIDDEN_CHINESE_COMMENT
+  end
+  local comment = build_comment(en, ja, show_en, show_ja)
+  -- An empty ShadowCandidate comment inherits the source comment.  Keep a
+  -- non-visible language marker so disabled annotations stay disabled.
+  if comment == "" then return HIDDEN_CHINESE_COMMENT end
+  return comment
+end
+
+-- common_phrase_data.lua is personal data and is intentionally excluded from
+-- release installers.  A clean installation must still initialize every Lua
+-- component; use an empty phrase map until the settings panel creates it.
+local common_phrase_ok, common_phrase_data = pcall(require, "common_phrase_data")
+local COMMON_PHRASES = common_phrase_ok and type(common_phrase_data) == "table"
+    and common_phrase_data or {}
 
 local function common_phrases_for(code)
   local ordered, lookup = COMMON_PHRASES[code] or {}, {}
@@ -158,6 +182,7 @@ local function translation_annotation_filter(input, env)
   local context = env.engine.context
   local show_en = context:get_option("show_english_annotation")
   local show_ja = context:get_option("show_japanese_annotation")
+  local show_single_character = context:get_option("show_single_character_annotation")
 
   local phrase_order, phrase_lookup = common_phrases_for(context.input:lower():gsub("%s+", ""))
 
@@ -175,8 +200,10 @@ local function translation_annotation_filter(input, env)
         if first and second then en, ja = first, second end
       end
       if en or ja then
-        cand = ShadowCandidate(cand, cand.type, cand.text,
-                               build_comment(en, ja, show_en, show_ja))
+        cand = ShadowCandidate(
+            cand, cand.type, cand.text,
+            visible_or_hidden_comment(cand.text, en, ja, show_en, show_ja,
+                                      show_single_character))
       end
       yield(cand)
     end
@@ -210,8 +237,10 @@ local function translation_annotation_filter(input, env)
     end
 
     if en or ja then
-      cand = ShadowCandidate(cand, cand.type, cand.text,
-                             build_comment(en, ja, show_en, show_ja))
+      cand = ShadowCandidate(
+          cand, cand.type, cand.text,
+          visible_or_hidden_comment(cand.text, en, ja, show_en, show_ja,
+                                    show_single_character))
     end
 
     if phrase_lookup[cand.text] then

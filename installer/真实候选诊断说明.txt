@@ -1,0 +1,5 @@
+双击“运行真实候选诊断.cmd”。
+
+该工具只读取当前小狼毫运行库和 Rime 用户目录，不会部署、删除或修改配置。
+它会直接调用 librime，选择 rime_ice_japanese，输入 nihao，并读取真实候选。
+完成后会在桌面生成 Rime-CNJP-Real-Candidate-Diagnostic_时间.txt。

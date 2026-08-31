@@ -68,7 +68,7 @@ if ($backupDir -and (Test-Path -LiteralPath $backupDir)) {
     Write-InstallLog '恢复用户词频、同步数据、常用语和用户状态。'
     Get-ChildItem -LiteralPath $backupDir -Force | Where-Object {
         $_.Name -like '*.userdb*' -or
-        $_.Name -in @('sync', 'clipboard', 'custom_phrase.txt', 'common_phrase_data.lua', 'user.yaml', 'installation.yaml')
+        $_.Name -in @('sync', 'clipboard', 'custom_phrase.txt', 'custom_japanese_fuzzy.tsv', 'custom_chinese_fuzzy.tsv', 'common_phrase_data.lua', 'user.yaml', 'installation.yaml')
     } | ForEach-Object {
         Copy-Item -LiteralPath $_.FullName -Destination $rimeDir -Recurse -Force
     }

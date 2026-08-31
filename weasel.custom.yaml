@@ -12,6 +12,8 @@ patch:
   "preset_color_schemes/android/chinese_candidate_back_color": 0x00000000
   "preset_color_schemes/android/japanese_candidate_text_color": 0xFFC4CB80
   "preset_color_schemes/android/japanese_candidate_back_color": 0x00000000
+  "preset_color_schemes/android/common_phrase_candidate_text_color": 0xFFF2F2F2
+  "preset_color_schemes/android/common_phrase_candidate_back_color": 0x00000000
   "style/display_tray_icon": true
   "style/horizontal": true
   "style/inline_preedit": false

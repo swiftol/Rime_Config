@@ -28,6 +28,7 @@ switcher:
   save_options:
     - show_english_annotation
     - show_japanese_annotation
+    - show_single_character_annotation
     - full_shape  # 保留全角模式
     - ascii_punct # 保留西文模式
     - transcription     # 保留汉字简繁体选项

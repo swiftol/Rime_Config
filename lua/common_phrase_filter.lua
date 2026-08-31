@@ -1,5 +1,28 @@
 local START_MARKER = "# --- RimeSettings common phrases begin ---"
 local END_MARKER = "# --- RimeSettings common phrases end ---"
+local LANGUAGE_JA = "[[RIME_LANG:JA]]"
+local LANGUAGE_ZH = "[[RIME_LANG:ZH]]"
+local LANGUAGE_CP = "[[RIME_LANG:CP]]"
+
+local function phrase_language_marker(text, comment)
+  comment = comment or ""
+  local has_han = false
+  for _, cp in utf8.codes(text or "") do
+    if (cp >= 0x3040 and cp <= 0x30ff) or cp == 0x30fc then
+      return LANGUAGE_JA
+    end
+    if (cp >= 0x3400 and cp <= 0x9fff) or
+       (cp >= 0xf900 and cp <= 0xfaff) then
+      has_han = true
+    end
+  end
+  -- Visible kana is authoritative.  Some matched dictionary candidates carry
+  -- a stale Chinese marker; preserving it used to recolour Japanese common
+  -- phrases as Chinese.
+  if comment:find(LANGUAGE_JA, 1, true) then return LANGUAGE_JA end
+  if comment:find(LANGUAGE_ZH, 1, true) then return LANGUAGE_ZH end
+  return has_han and LANGUAGE_ZH or ""
+end
 
 do
   local file = io.open(rime_api.get_user_data_dir() .. "/common_phrase_load.log", "a")
@@ -84,10 +107,14 @@ local function common_phrase_filter(input, env)
     for _, text in ipairs(phrases) do
       local cand = matched[text]
       if not cand then
-        cand = Candidate("common_phrase", anchor.start, anchor._end, text, "")
+        cand = Candidate("common_phrase", anchor.start, anchor._end, text,
+                         LANGUAGE_CP .. phrase_language_marker(text, ""))
         cand.quality = 1000000000
       end
-      yield(ShadowCandidate(cand, "common_phrase", text, ""))
+      -- ShadowCandidate used to erase the hidden language metadata here, so
+      -- common phrases always fell back to the theme's generic colours.
+      yield(ShadowCandidate(cand, "common_phrase", text,
+                            LANGUAGE_CP .. phrase_language_marker(text, cand.comment)))
     end
   end
   for i = 2, #regular do yield(regular[i]) end

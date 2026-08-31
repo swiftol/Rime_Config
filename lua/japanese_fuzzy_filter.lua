@@ -13,6 +13,7 @@ local RULES = {
 local fuzzy_learning = require("japanese_fuzzy_learning")
 
 local COMBINED_MARKER = "[JF:COMBINED]"
+local CUSTOM_MARKER = "[JF:CUSTOM]"
 
 local ROMAJI = {
   kya="きゃ", kyu="きゅ", kyo="きょ", gya="ぎゃ", gyu="ぎゅ", gyo="ぎょ",
@@ -65,6 +66,39 @@ local function romaji_to_hiragana(code)
     end
   end
   return table.concat(out)
+end
+
+-- Return true only when every byte of the spelling can be consumed as
+-- Japanese romaji.  This separates real composed Japanese such as
+-- `warui desu` from Chinese pinyin that the Japanese translator happened to
+-- segment into a sentence, for example `xi anzai shuru` (`xi` is not a
+-- Japanese syllable).
+local function is_valid_japanese_romaji(code)
+  code = (code or ""):lower():gsub("[%s']+", "")
+  if code == "" then return false end
+  local i = 1
+  while i <= #code do
+    local c = code:sub(i, i)
+    local next_c = code:sub(i + 1, i + 1)
+    if c == next_c and c:match("[bcdfghjklmpqrstvwxyz]") and c ~= "n" then
+      i = i + 1
+    elseif c == "n" and
+           (next_c == "" or next_c:match("[^aeiouy]") or next_c == "n") then
+      i = i + (next_c == "n" and 2 or 1)
+    else
+      local found = false
+      for length = 3, 1, -1 do
+        local part = code:sub(i, i + length - 1)
+        if ROMAJI[part] then
+          i = i + length
+          found = true
+          break
+        end
+      end
+      if not found then return false end
+    end
+  end
+  return true
 end
 
 local function fuzzy_spelling_covers_input(marker, spelling, typed)
@@ -331,6 +365,17 @@ local function japanese_fuzzy_filter(input, env)
     active_input = raw_input:sub(active.start + 1, active._end or #raw_input)
   end
   local typed = active_input:lower():gsub("[%s']+", "")
+  local protected_suffix = nil
+  for _, suffix in ipairs({ "desuka", "masuka", "desu", "masu" }) do
+    if typed:sub(-#suffix) == suffix then
+      protected_suffix = suffix
+      break
+    end
+  end
+  local protected_kana_suffix = protected_suffix and ({
+    desuka = "ですか", masuka = "ますか",
+    desu = "です", masu = "ます",
+  })[protected_suffix] or nil
   local continuation_ja = false
   if context:get_option("japanese_continuation_lock") and active and
      active.start and active.start > 0 then
@@ -355,34 +400,82 @@ local function japanese_fuzzy_filter(input, env)
   if not master_enabled then
     local head = {}
     local HEAD_LIMIT = 48
-    for cand in input:iter() do
-      local comment = cand.comment or ""
-      local is_fuzzy = comment:sub(1, #COMBINED_MARKER) == COMBINED_MARKER
-      if not is_fuzzy then
-        for _, rule in ipairs(RULES) do
-          if comment:sub(1, #rule.marker) == rule.marker then
-            is_fuzzy = true
+    local function yield_clean_head(items)
+      local full_chinese = false
+      if #typed >= 8 then
+        for _, item in ipairs(items) do
+          local text = item.text or ""
+          local preedit = (item.preedit or ""):lower():gsub("[%s']+", "")
+          local has_han = has_script(text, 0x3400, 0x9fff) or
+                          has_script(text, 0xf900, 0xfaff)
+          local has_kana = has_script(text, 0x3040, 0x30ff)
+          if preedit == typed and has_han and not has_kana then
+            full_chinese = true
             break
           end
         end
       end
-      if not is_fuzzy and not is_hidden_chinese_completion(cand) then
-        if #head < HEAD_LIMIT then
-          head[#head + 1] = cand
-        else
-          if #head > 0 then
-            yield_exact_with_particle_second(head, typed)
-            head = {}
+      local cleaned = {}
+      for _, item in ipairs(items) do
+        local is_japanese_sentence = item.type == "sentence" and
+          has_script(item.text or "", 0x3040, 0x30ff)
+        local bogus_japanese_sentence = is_japanese_sentence and
+          not is_valid_japanese_romaji(typed)
+        if not (full_chinese and bogus_japanese_sentence) then
+          cleaned[#cleaned + 1] = item
+        end
+      end
+      yield_exact_with_particle_second(cleaned, typed)
+    end
+    for cand in input:iter() do
+      local comment = cand.comment or ""
+      if comment:sub(1, #CUSTOM_MARKER) == CUSTOM_MARKER then
+        if #head > 0 then
+          yield_clean_head(head)
+          head = {}
+        end
+        local payload = comment:sub(#CUSTOM_MARKER + 1)
+        local spelling = payload:match("^(.-)%[%[JF_TYPED:.-%]%]$") or payload
+        spelling = strip_language_metadata(spelling)
+        local kana = romaji_to_hiragana(spelling)
+        local converted = ShadowCandidate(cand, cand.type, cand.text,
+          kana ~= "" and ("[JF_READING]" .. kana) or "")
+        yield(tag_candidate_language(converted))
+      else
+        local is_fuzzy = comment:sub(1, #COMBINED_MARKER) == COMBINED_MARKER
+        if not is_fuzzy then
+          for _, rule in ipairs(RULES) do
+            if comment:sub(1, #rule.marker) == rule.marker then
+              is_fuzzy = true
+              break
+            end
           end
-          yield(tag_candidate_language(cand))
+        end
+        if not is_fuzzy and not is_hidden_chinese_completion(cand) then
+          if #head < HEAD_LIMIT then
+            head[#head + 1] = cand
+          else
+            if #head > 0 then
+              yield_clean_head(head)
+              head = {}
+            end
+            yield(tag_candidate_language(cand))
+          end
         end
       end
     end
-    if #head > 0 then yield_exact_with_particle_second(head, typed) end
+    if #head > 0 then yield_clean_head(head) end
     return
   end
 
-  local exact, fuzzy_kanji, fuzzy_other, assembled, completion = {}, {}, {}, {}, {}
+  local exact, fuzzy_kanji, fuzzy_other = {}, {}, {}
+  local assembled, assembled_japanese, japanese_sentence = {}, {}, {}
+  local completion, completion_japanese = {}, {}
+  -- A long Chinese spelling can also be segmented by the Japanese translator
+  -- into a bogus mixed-script sentence (for example xianzaishuru ->
+  -- ぃ安西手る).  Remember that a genuine whole-input Chinese candidate
+  -- exists so those broad Japanese corrections can be hidden at flush time.
+  local has_full_exact_chinese = false
   local buffered = 0
   -- The deepest validated whole-word correction currently starts at #59.
   -- 96 preserves enough headroom for ranking without scanning hundreds or
@@ -392,6 +485,10 @@ local function japanese_fuzzy_filter(input, env)
   -- #150).  Scan deeper only for sufficiently specific input; keeping the
   -- old limit for short input avoids bringing back Backspace latency.
   local BUFFER_LIMIT = (#typed >= 5) and 192 or 96
+  -- Full polite expressions can be emitted after many Chinese syllable and
+  -- short Japanese prefix candidates.  Keep enough headroom to rank the
+  -- complete exact sentence (悪いですか) before those prefixes.
+  if protected_suffix then BUFFER_LIMIT = math.max(BUFFER_LIMIT, 320) end
   -- hu/fu corrections can sit behind a large number of short Chinese
   -- candidates (huan -> 不安 was raw #255).  Deepen only this requested
   -- consonant pair instead of making every short input expensive.
@@ -421,7 +518,41 @@ local function japanese_fuzzy_filter(input, env)
   end
 
   local function flush()
-    yield_exact_with_particle_second(exact, typed)
+    if protected_suffix and #exact > 1 then
+      local kana_suffix = ({
+        desuka = "ですか", masuka = "ますか",
+        desu = "です", masu = "ます",
+      })[protected_suffix]
+      local reordered, emitted = {}, {}
+      -- Preserve the contract: first exact Chinese candidate, then the
+      -- natural full Japanese sentence, then the remaining exact results.
+      for i, item in ipairs(exact) do
+        local text = item.text or ""
+        local has_han_text = has_script(text, 0x3400, 0x9fff) or
+                             has_script(text, 0xf900, 0xfaff)
+        local has_kana_text = has_script(text, 0x3040, 0x30ff)
+        if has_han_text and not has_kana_text then
+          reordered[#reordered + 1] = item
+          emitted[i] = true
+          break
+        end
+      end
+      for i = 1, #exact do
+        local text = exact[i].text or ""
+        if not emitted[i] and kana_suffix and text:sub(-#kana_suffix) == kana_suffix then
+          reordered[#reordered + 1] = exact[i]
+          emitted[i] = true
+        end
+      end
+      for i = 1, #exact do
+        if not emitted[i] then
+          reordered[#reordered + 1] = exact[i]
+        end
+      end
+      yield_exact_with_particle_second(reordered, typed)
+    else
+      yield_exact_with_particle_second(exact, typed)
+    end
     table.sort(fuzzy_kanji, function(a, b)
       local learned_a = fuzzy_learning.score(typed, a.text)
       local learned_b = fuzzy_learning.score(typed, b.text)
@@ -437,28 +568,53 @@ local function japanese_fuzzy_filter(input, env)
     -- Keep the standard kana form beside the first kanji form with the same
     -- reading.  Otherwise rare spellings can fill the whole visible row
     -- before a common form such as さすが appears.
-    local emitted_other = {}
-    local reading_seen = {}
-    for _, cand in ipairs(fuzzy_kanji) do
-      yield(tag_candidate_language(cand))
-      local reading = (cand.comment or ""):match("%[JF_READING%](.*)$") or ""
-      if reading ~= "" and not reading_seen[reading] then
-        reading_seen[reading] = true
-        for index, other in ipairs(fuzzy_other) do
-          local other_reading = (other.comment or ""):match("%[JF_READING%](.*)$") or ""
-          if other_reading == reading then
-            yield(tag_candidate_language(other))
-            emitted_other[index] = true
+    -- Once a sufficiently long input already has an exact Chinese word or
+    -- phrase, broad Japanese fuzzy output is almost always segmentation
+    -- noise rather than a useful alternative.  Exact Japanese dictionary
+    -- words remain in `exact`; only fuzzy corrections are suppressed.
+    if not (has_full_exact_chinese and #typed >= 8 and
+            not is_valid_japanese_romaji(typed)) then
+      local emitted_other = {}
+      local reading_seen = {}
+      for _, cand in ipairs(fuzzy_kanji) do
+        yield(tag_candidate_language(cand))
+        local reading = (cand.comment or ""):match("%[JF_READING%](.*)$") or ""
+        if reading ~= "" and not reading_seen[reading] then
+          reading_seen[reading] = true
+          for index, other in ipairs(fuzzy_other) do
+            local other_reading = (other.comment or ""):match("%[JF_READING%](.*)$") or ""
+            if other_reading == reading then
+              yield(tag_candidate_language(other))
+              emitted_other[index] = true
+            end
           end
         end
       end
+      for index, cand in ipairs(fuzzy_other) do
+        if not emitted_other[index] then yield(tag_candidate_language(cand)) end
+      end
     end
-    for index, cand in ipairs(fuzzy_other) do
-      if not emitted_other[index] then yield(tag_candidate_language(cand)) end
+    -- For a completely valid Japanese spelling, useful shorter Japanese
+    -- words (warui under waruidesu) must stay beside the whole expression,
+    -- rather than being buried behind Chinese syllable fallbacks.
+    local valid_japanese_input = is_valid_japanese_romaji(typed)
+    if valid_japanese_input then
+      for _, cand in ipairs(assembled_japanese) do
+        yield(tag_candidate_language(cand))
+      end
+      assembled_japanese = {}
     end
     for _, cand in ipairs(assembled) do yield(tag_candidate_language(cand)) end
+    if not (has_full_exact_chinese and #typed >= 8 and
+            not is_valid_japanese_romaji(typed)) then
+      for _, cand in ipairs(assembled_japanese) do yield(tag_candidate_language(cand)) end
+      for _, cand in ipairs(japanese_sentence) do yield(tag_candidate_language(cand)) end
+      for _, cand in ipairs(completion_japanese) do yield(tag_candidate_language(cand)) end
+    end
     for _, cand in ipairs(completion) do yield(tag_candidate_language(cand)) end
-    exact, fuzzy_kanji, fuzzy_other, assembled, completion = {}, {}, {}, {}, {}
+    exact, fuzzy_kanji, fuzzy_other = {}, {}, {}
+    assembled, assembled_japanese, japanese_sentence = {}, {}, {}
+    completion, completion_japanese = {}, {}
   end
 
   for cand in input:iter() do
@@ -469,6 +625,7 @@ local function japanese_fuzzy_filter(input, env)
     -- the fuzzy reading and appending exactly one fresh language tag.
     comment = strip_language_metadata(comment)
     local matched_rule = nil
+    local is_custom = false
     local spelling = nil
     for _, rule in ipairs(RULES) do
       if comment:sub(1, #rule.marker) == rule.marker then
@@ -476,7 +633,12 @@ local function japanese_fuzzy_filter(input, env)
         break
       end
     end
-    if comment:sub(1, #COMBINED_MARKER) == COMBINED_MARKER then
+    if comment:sub(1, #CUSTOM_MARKER) == CUSTOM_MARKER then
+      is_custom = true
+      local payload = comment:sub(#CUSTOM_MARKER + 1)
+      spelling = payload:match("^(.-)%[%[JF_TYPED:.-%]%]$") or payload
+      spelling = strip_language_metadata(spelling)
+    elseif comment:sub(1, #COMBINED_MARKER) == COMBINED_MARKER then
       local payload = comment:sub(#COMBINED_MARKER + 1)
       local segment_typed
       spelling, segment_typed = payload:match("^(.-)%[%[JF_TYPED:(.-)%]%]$")
@@ -498,18 +660,28 @@ local function japanese_fuzzy_filter(input, env)
         matched_rule = combined_rule_for(spelling, segment_typed, context)
       end
     end
-    if matched_rule and master_enabled and context:get_option(matched_rule.option) then
+    if is_custom or (matched_rule and master_enabled and context:get_option(matched_rule.option)) then
       spelling = spelling or comment:sub(#matched_rule.marker + 1)
-      local kana = romaji_to_hiragana(spelling)
-      local ui_comment = kana ~= "" and ("[JF_READING]" .. kana) or ""
-      local converted = ShadowCandidate(cand, cand.type, cand.text, ui_comment)
-      if buffered < BUFFER_LIMIT then
-        local bucket = has_kanji(cand.text) and fuzzy_kanji or fuzzy_other
-        bucket[#bucket + 1] = converted
-      else
-        yield(tag_candidate_language(converted))
+      -- A correct polite ending is grammar, not a fuzzy target.  Keep broad
+      -- prism matches that repair the stem, but discard any match that turns
+      -- desuka into tesuka/dezuka/desuga (and the corresponding desu/masu
+      -- endings).  Custom user rules remain literal and are not constrained.
+      local suffix_ok = is_custom or not protected_suffix or
+                        (spelling:sub(-#protected_suffix) == protected_suffix and
+                         protected_kana_suffix and
+                         (cand.text or ""):sub(-#protected_kana_suffix) == protected_kana_suffix)
+      if suffix_ok then
+        local kana = romaji_to_hiragana(spelling)
+        local ui_comment = kana ~= "" and ("[JF_READING]" .. kana) or ""
+        local converted = ShadowCandidate(cand, cand.type, cand.text, ui_comment)
+        if buffered < BUFFER_LIMIT then
+          local bucket = has_kanji(cand.text) and fuzzy_kanji or fuzzy_other
+          bucket[#bucket + 1] = converted
+        else
+          yield(tag_candidate_language(converted))
+        end
       end
-    elseif not matched_rule and comment:sub(1, #COMBINED_MARKER) ~= COMBINED_MARKER
+    elseif not matched_rule and not is_custom and comment:sub(1, #COMBINED_MARKER) ~= COMBINED_MARKER
            and not is_hidden_chinese_completion(cand) then
       local quality = tonumber(cand.quality) or 0
       local candidate_has_kana = has_script(cand.text, 0x3040, 0x30ff)
@@ -527,20 +699,37 @@ local function japanese_fuzzy_filter(input, env)
         -- the same language instead of restarting Chinese mixed input.
         goto continue
       end
+      -- When the active input is a complete polite expression, a Japanese
+      -- candidate must also cover that complete grammar.  Prefix candidates
+      -- such as 悪い and malformed assemblies such as 悪出すか must not
+      -- occupy the visible row for waruidesuka.
+      if protected_kana_suffix and candidate_is_japanese and
+         (cand.text or ""):sub(-#protected_kana_suffix) ~= protected_kana_suffix then
+        goto continue
+      end
       if buffered < BUFFER_LIMIT then
         local preedit = (cand.preedit or ""):lower():gsub("[%s']+", "")
         if cand.type == "completion" then
-          completion[#completion + 1] = cand
+          local bucket = candidate_is_japanese and completion_japanese or completion
+          bucket[#bucket + 1] = cand
         -- Only a candidate whose complete spelling equals the active input
         -- is exact.  Translator quality alone is insufficient: prefix
         -- candidates such as sasu under sasuka also carry Japanese quality
         -- 200 and must stay behind the whole-word fuzzy match さすが.
         elseif preedit == typed and
-               (cand.type ~= "sentence" or
-                has_script(cand.text, 0x3040, 0x30ff)) then
+               (cand.type ~= "sentence" or is_chinese or
+                (candidate_is_japanese and
+                 (protected_suffix or is_valid_japanese_romaji(typed)))) and
+               not ((cand.text or ""):find("[A-Za-z]") and
+                    (candidate_has_kana or candidate_has_han)) and
+               not (cand.text or ""):find("[A-Za-z]") then
           exact[#exact + 1] = cand
+          if is_chinese then has_full_exact_chinese = true end
+        elseif cand.type == "sentence" and candidate_is_japanese then
+          japanese_sentence[#japanese_sentence + 1] = cand
         else
-          assembled[#assembled + 1] = cand
+          local bucket = candidate_is_japanese and assembled_japanese or assembled
+          bucket[#bucket + 1] = cand
         end
       else
         yield(tag_candidate_language(cand))

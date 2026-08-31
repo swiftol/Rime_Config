@@ -22,7 +22,6 @@ schema:
     - japanese_fuzzy_long_u
     - japanese_fuzzy_long_mark
     - japanese_fuzzy_chi_ji
-    - japanese_fuzzy_dakuten
 
 # 开关
 switches:
@@ -41,6 +40,8 @@ switches:
     states: [ 英关, 英注 ]
   - name: show_japanese_annotation
     states: [ 日关, 日注 ]
+  - name: show_single_character_annotation
+    states: [ 单字注关, 单字注 ]
   - name: japanese_continuation_lock
     states: [ 续输混合, 日语续输 ]
     reset: 1
