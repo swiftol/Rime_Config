@@ -87,6 +87,8 @@ internal sealed class ToggleSwitch : CheckBox
         Text = "";
         Width = 48;
         Height = 26;
+        BackColor = Theme.Surface;
+        TabStop = false;
         Cursor = Cursors.Hand;
         SetStyle(ControlStyles.AllPaintingInWmPaint |
                  ControlStyles.OptimizedDoubleBuffer |
@@ -96,6 +98,10 @@ internal sealed class ToggleSwitch : CheckBox
 
     protected override void OnPaint(PaintEventArgs e)
     {
+        // CheckBox keeps the system button background outside the custom
+        // capsule unless the complete client area is painted explicitly.
+        // That leaked as white strips on the right and bottom in the dark UI.
+        e.Graphics.Clear(Parent?.BackColor ?? BackColor);
         e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
         var track = new Rectangle(0, 2, Width - 1, Height - 4);
         using var trackPath = RoundedPanel.RoundedRect(track, track.Height / 2);

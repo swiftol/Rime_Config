@@ -7,6 +7,12 @@ if (!(Test-Path -LiteralPath $framework)) { throw "C# compiler not found: $frame
 if ($LASTEXITCODE -ne 0) { throw 'Bootstrap build failed.' }
 Write-Host "Built: $output"
 
+$mozcLauncherSource = Join-Path $PSScriptRoot 'MozcV2Launcher.cs'
+$mozcLauncherOutput = Join-Path $PSScriptRoot 'MozcV2Launcher.exe'
+& $framework /nologo /optimize+ /target:winexe "/out:$mozcLauncherOutput" $mozcLauncherSource
+if ($LASTEXITCODE -ne 0) { throw 'Mozc V2 launcher build failed.' }
+Write-Host "Built: $mozcLauncherOutput"
+
 $vswhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
 if (!(Test-Path -LiteralPath $vswhere)) { throw "vswhere not found: $vswhere" }
 $vsRoot = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath

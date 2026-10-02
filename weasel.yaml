@@ -28,6 +28,8 @@ global_ascii: false                        # 切换为 ascii 模式时，是否�
 # [style]
 # 字体；候选项、候选窗口的行为、布局及样式
 style:
+  expanded_comment_width: false            # 展开候选中，每个候选固定占一格；注释不扩展格宽
+  hover_comment_scroll: false              # 长注释悬停时默认弹出完整三行卡片；开启后改为候选格内滚动
   color_scheme: mint_light_blue             # 默认配色方案
   color_scheme_dark: mint_dark_blue         # 深色模式下，Weasel 的配色方案，Windows 10 1809+ 可用
 

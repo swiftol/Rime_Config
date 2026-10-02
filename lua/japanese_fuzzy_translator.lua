@@ -35,10 +35,37 @@ function M.init(env)
   -- desired whole word beyond its bounded result window.
   env.exact_memory = Memory(env.engine, Schema("japanese"))
   env.custom_rules = load_custom_rules()
+  env.custom_rules_generation = ""
+  env.completed_cache = {}
+  env.completed_order = {}
+end
+
+local function remember_completed(env, input, text)
+  if not input or input == "" or not text or text == "" then return end
+  local values = env.completed_cache[input]
+  if not values then
+    values = {}
+    env.completed_cache[input] = values
+    env.completed_order[#env.completed_order + 1] = input
+    if #env.completed_order > 64 then
+      local oldest = table.remove(env.completed_order, 1)
+      env.completed_cache[oldest] = nil
+    end
+  end
+  for _, existing in ipairs(values) do
+    if existing == text then return end
+  end
+  if #values < 9 then values[#values + 1] = text end
 end
 
 function M.func(input, segment, env)
+  if segment:has_tag("japanese_input_table") then return end
   local context = env.engine.context
+  local generation = context:get_property("japanese_fuzzy_rules_generation") or ""
+  if generation ~= env.custom_rules_generation then
+    env.custom_rules = load_custom_rules()
+    env.custom_rules_generation = generation
+  end
   local fuzzy_master = context:get_option("japanese_fuzzy_match")
   -- Enabled custom rules are independent user choices.  The built-in master
   -- switch controls only the built-in fuzzy families below.
@@ -48,10 +75,41 @@ function M.func(input, segment, env)
   -- already cover them.  Starting fuzzy lookup here made held Backspace queue.
   if #compact < 3 then return end
 
+  -- When the user is between morae (`...gyo` -> `...gyos` -> `...gyosh`),
+  -- keep the completed fuzzy conversion from the preceding frame.  The core
+  -- Mozc translator cannot see candidates produced by this fuzzy translator;
+  -- without this local cache it made three blocking mailbox retries and still
+  -- blanked the menu.  Final n is a complete mora and q is the product's long
+  -- vowel key, so neither enters this hold path.
+  if compact:match("[bcdfghjklmprstvwxyz]$") then
+    if context:get_option("japanese_prefix_completion_disabled") then return end
+    for trim = 1, math.min(3, #compact - 1) do
+      local previous = compact:sub(1, #compact - trim)
+      local cached = env.completed_cache[previous]
+      if cached and #cached > 0 then
+        for index, text in ipairs(cached) do
+          local held = Candidate("completion", segment.start, segment._end,
+                                 text, "[JP:PREFIX]")
+          held.quality = 199 - index
+          yield(held)
+        end
+        return
+      end
+    end
+    -- A trailing consonant (except the complete mora `n` and the product's
+    -- long-vowel key `q`, both excluded above) is not a completed Japanese
+    -- syllable.  If no safe previous-frame completion exists, exact
+    -- translators must handle the prefix alone.  Continuing into fuzzy rules
+    -- here makes dakuten replacement reinterpret `gak` as `kak` and vice
+    -- versa, so the opposite consonant can incorrectly become candidate 1.
+    return
+  end
+
   -- The ranking filter only needs the head of the fuzzy result set.  Keeping
   -- this bounded prevents one-letter input and Backspace from expanding the
   -- entire Japanese dictionary.
   local queries, query_seen, custom_query = {}, {}, {}
+  local double_vowel_query = {}
   -- Once a correctly typed polite ending is present, fuzzy rules may repair
   -- the lexical stem but must never rewrite the grammar itself.  Rewriting
   -- desuka produced nonsense such as tesuka / dezuka / desuga and made those
@@ -74,6 +132,14 @@ function M.func(input, segment, env)
     if is_custom and query ~= "" then custom_query[query] = true end
   end
   add_query(compact)
+  -- A stray leading vowel is a common boundary/rollover typo.  Keep the
+  -- original exact query first, then try the spelling with that one vowel
+  -- removed (umakura -> makura -> 枕).  Requiring a four-letter remainder
+  -- keeps short-input fan-out bounded.
+  if fuzzy_master and #compact >= 5 and
+     compact:sub(1, 1):match("[aeiou]") then
+    add_query(compact:sub(2))
+  end
   -- User-defined rules are literal, bidirectional replacements and are only
   -- applied inside this Japanese translator.  They never enter the global
   -- speller algebra, so a Japanese rule cannot create Chinese candidates.
@@ -179,19 +245,74 @@ function M.func(input, segment, env)
     add_u_after_each("o")
     add_u_after_each("u")
   end
-  if fuzzy_master and context:get_option("japanese_fuzzy_dakuten") then
+  if fuzzy_master and context:get_option("japanese_fuzzy_long_i") then
+    -- The separate long-i prism finds single omissions, but its result can
+    -- arrive below a page of synthesized sentence fragments.  Query the
+    -- complete corrected spelling directly, as for long-u omissions.
+    for position = 1, #compact do
+      local vowel = compact:sub(position, position)
+      local following = compact:sub(position + 1, position + 1)
+      if (vowel == "e" or vowel == "i") and
+         not following:match("[aeiou]") then
+        add_query(compact:sub(1, position) .. "i" .. compact:sub(position + 1))
+      end
+    end
+  end
+  -- Restore at most two independently omitted long vowels as complete-word
+  -- lookups.  Separate one-rule prisms cannot combine ei -> e and ou -> o
+  -- (seishounen -> seshonen), and broad sentence conversion invents mixed
+  -- kana/kanji fragments instead.  Bound both input length and fan-out.
+  if fuzzy_master and #compact >= 6 and #compact <= 24 then
+    local function restore_one(source)
+      local variants = {}
+      for position = 1, #source do
+        local vowel = source:sub(position, position)
+        local following = source:sub(position + 1, position + 1)
+        local previous = source:sub(position - 1, position - 1)
+        local inserted = nil
+        if context:get_option("japanese_fuzzy_long_i") and
+           (vowel == "e" or vowel == "i") and
+           not following:match("[aeiou]") then
+          inserted = "i"
+        elseif context:get_option("japanese_fuzzy_long_u") and
+               (vowel == "o" or vowel == "u") and
+               not following:match("[aeiou]") and
+               (vowel ~= "u" or not previous:match("[aeiou]")) then
+          inserted = "u"
+        end
+        if inserted then
+          variants[#variants + 1] = source:sub(1, position) .. inserted ..
+                                    source:sub(position + 1)
+        end
+      end
+      return variants
+    end
+    local generated = 0
+    for _, once in ipairs(restore_one(compact)) do
+      for _, twice in ipairs(restore_one(once)) do
+        if not query_seen[twice] then
+          add_query(twice)
+          double_vowel_query[twice] = true
+          generated = generated + 1
+          if generated >= 24 then break end
+        end
+      end
+      if generated >= 24 then break end
+    end
+  end
+  local function add_dakuten_queries(source)
     -- Query corrected consonants on demand instead of deriving them into the
     -- 1.8M-entry prism.  The prism's existing small-tsu rule then handles
     -- shubatsu -> shupatsu -> shuppatsu and rohyaku -> ropyaku -> roppyaku.
-    if compact:find("b", 1, true) then add_query((compact:gsub("b", "p"))) end
-    if compact:find("h", 1, true) then add_query((compact:gsub("h", "p"))) end
-    if compact:find("d", 1, true) then add_query((compact:gsub("d", "t"))) end
+    if source:find("b", 1, true) then add_query((source:gsub("b", "p"))) end
+    if source:find("h", 1, true) then add_query((source:gsub("h", "p"))) end
+    if source:find("d", 1, true) then add_query((source:gsub("d", "t"))) end
     local function add_single_replacements(from, to)
       local start = 1
       while true do
-        local first, last = compact:find(from, start, true)
+        local first, last = source:find(from, start, true)
         if not first then break end
-        add_query(compact:sub(1, first - 1) .. to .. compact:sub(last + 1))
+        add_query(source:sub(1, first - 1) .. to .. source:sub(last + 1))
         start = first + 1
       end
     end
@@ -199,11 +320,45 @@ function M.func(input, segment, env)
     add_single_replacements("k", "g")
     add_single_replacements("z", "s")
     add_single_replacements("s", "z")
-    if compact:find("p", 1, true) then
-      add_query((compact:gsub("p", "b")))
-      add_query((compact:gsub("p", "h")))
+    if source:find("p", 1, true) then
+      add_query((source:gsub("p", "b")))
+      add_query((source:gsub("p", "h")))
     end
-    if compact:find("t", 1, true) then add_query((compact:gsub("t", "d"))) end
+    if source:find("t", 1, true) then add_query((source:gsub("t", "d"))) end
+  end
+  if fuzzy_master and context:get_option("japanese_fuzzy_dakuten") then
+    add_dakuten_queries(compact)
+  end
+  if fuzzy_master and context:get_option("japanese_fuzzy_long_u") and
+     context:get_option("japanese_fuzzy_dakuten") then
+    -- Corrections may combine more than one omitted -u with one consonant
+    -- confusion.  Build a small, bounded set of spelling variants instead of
+    -- hard-coding words: fudoko -> fudoukou -> futoukou (不登校).
+    local variants = { compact }
+    local variant_seen = { [compact] = true }
+    for _ = 1, 2 do
+      local snapshot_count = #variants
+      for variant_index = 1, snapshot_count do
+        local source = variants[variant_index]
+        local start = 1
+        while #variants < 32 do
+          local position = source:find("o", start, true)
+          if not position then break end
+          if source:sub(position + 1, position + 1) ~= "u" then
+            local restored = source:sub(1, position) .. "u" .. source:sub(position + 1)
+            if not variant_seen[restored] then
+              variant_seen[restored] = true
+              variants[#variants + 1] = restored
+            end
+          end
+          start = position + 1
+        end
+      end
+    end
+    for index = 2, #variants do
+      add_query(variants[index])
+      add_dakuten_queries(variants[index])
+    end
   end
   local seen = {}
   -- Compose a complete polite question from an exact Japanese stem before
@@ -270,7 +425,11 @@ function M.func(input, segment, env)
             -- candidates.  Never label a short prefix such as `warui` with
             -- the full correction `waruidesuka`; fuzzy candidates must cover
             -- the complete corrected spelling.
-            if candidate_preedit == query then
+            -- A changed spelling is only a fuzzy correction when the whole
+            -- result is lexical.  Mozc/script sentence assembly can append
+            -- the inserted vowel as a stray kana (shinyamadei -> 深夜までい).
+            -- The unchanged spelling still has its normal sentence stream.
+            if candidate_preedit == query and candidate.type ~= "sentence" then
               local key = candidate.text .. "\0" .. query
               if not seen[key] then
                 seen[key] = true
@@ -280,6 +439,7 @@ function M.func(input, segment, env)
                   "[[JF_TYPED:" .. compact .. "]]"
                 )
                 marked.quality = 199
+                remember_completed(env, compact, marked.text)
                 yield(marked)
               end
             end
@@ -293,7 +453,10 @@ function M.func(input, segment, env)
   -- results can precede the exact corrected kaigi / 会議 result.
   for _, memory in ipairs({ env.exact_memory, env.memory }) do
     for _, query in ipairs(queries) do
-      local found = memory:dict_lookup(query, false, 48)
+      -- Two-edit restorations are deliberately strict dictionary lookups;
+      -- never ask the broad fuzzy memory to synthesize sentence fragments.
+      local found = (not double_vowel_query[query] or memory == env.exact_memory) and
+                    memory:dict_lookup(query, false, 48)
       if found then
         for entry in memory:iter_dict() do
           local decoded = memory:decode(entry.code)
@@ -318,6 +481,7 @@ function M.func(input, segment, env)
             -- sasuka -> sasuga -> さすが could be buried behind hundreds of
             -- prefix candidates before the ranking filter ever saw it.
             candidate.quality = 199
+            remember_completed(env, compact, candidate.text)
             yield(candidate)
           end
         end
@@ -335,6 +499,7 @@ function M.func(input, segment, env)
           (candidate.comment or "") .. "[[JF_TYPED:" .. compact .. "]]"
         )
         marked.quality = 199
+        remember_completed(env, compact, marked.text)
         yield(marked)
       end
     end

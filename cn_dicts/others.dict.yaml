@@ -12,6 +12,9 @@ version: "2026-03-08"
 sort: by_weight
 ...
 ##### 容错词
+# 中日混输项目补充的常用整词
+胖仔	pang zai	100000
+
 # 一些口语读音
 空落落	kong luo luo
 空落落	kong lao lao

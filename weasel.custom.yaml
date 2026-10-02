@@ -5,6 +5,8 @@ customization:
   modified_time: "Sat Jul 18 18:55:41 2026"
   rime_version: 1.13.1
 patch:
+  "style/expanded_comment_width": false
+  "style/hover_comment_scroll": false
   "style/color_scheme": android
   # Per-language candidate colors (ABGR). Text defaults to Chinese white and
   # Japanese teal; transparent backgrounds continue to use the theme panel.

@@ -34,10 +34,12 @@ end
 
 function M.func(input, env)
   local code = normalize_code(env.engine.context.input)
+  local hot_threshold = tonumber(env.engine.context:get_property("rare_single_char_threshold"))
+  local threshold = hot_threshold or env.threshold
   for candidate in input:iter() do
     local entry = env.entries[candidate.text]
     local hide = entry
-      and entry.max_weight < env.threshold
+      and entry.max_weight < threshold
       and entry.codes[code]
     if not hide then yield(candidate) end
   end

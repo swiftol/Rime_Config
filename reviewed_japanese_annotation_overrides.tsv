@@ -1,0 +1,41 @@
+# Chinese candidate	Japanese annotation	reason	verified Japanese reading
+鬼武者	鬼武者	JMdict+Mozc exact Japanese entry; reject NLLB fallback	おにむしゃ
+八重	八重	English Yae matches JMdict+Mozc reading	やえ
+安牌	安牌	English Anpai matches JMdict+Mozc reading	あんぱい
+止水	止水	English Shisui matches JMdict+Mozc reading	しすい
+下忍	下忍	English Genin matches JMdict+Mozc reading	げにん
+弥生	弥生	English Yayoi matches JMdict+Mozc reading	やよい
+奈落	奈落	English Naraku matches JMdict+Mozc reading	ならく
+村雨	村雨	English Murasame matches JMdict+Mozc reading	むらさめ
+早乙女	早乙女	English Saotome matches JMdict+Mozc reading	さおとめ
+深田	深田	English Fukada matches JMdict+Mozc reading	ふかだ
+玄米茶	玄米茶	English genmaicha matches JMdict+Mozc reading	げんまいちゃ
+初音	初音	English Hatsune matches JMdict+Mozc reading	はつね
+真田	真田	English Sanada matches JMdict+Mozc reading	さなだ
+那由多	那由多	English Nayuta matches JMdict+Mozc reading	なゆた
+御宅	御宅	English Otaku matches JMdict+Mozc reading	おたく
+吹雪	吹雪	English Fubuki matches JMdict+Mozc reading	ふぶき
+羽衣	羽衣	English Hagoromo matches JMdict+Mozc reading	はごろも
+澪	澪	English mio matches JMdict+Mozc reading	みお
+嵯峨	嵯峨	English Saga matches JMdict+Mozc reading	さが
+暗部	暗部	English ANBU matches JMdict+Mozc reading	あんぶ
+小田	小田	English Oda matches JMdict+Mozc reading	おだ
+小野	小野	English Ono matches JMdict+Mozc reading	おの
+一色	一色	English Isshiki matches JMdict+Mozc reading	いっしき
+天丼	天丼	English Tendon matches JMdict+Mozc reading	てんどん
+平成	平成	English Heisei matches JMdict+Mozc reading	へいせい
+小百合	小百合	English Sayuri matches JMdict+Mozc reading	さゆり
+安土	安土	English Azuchi matches JMdict+Mozc reading	あづち
+幕下	幕下	English makushita matches JMdict+Mozc reading	まくした
+玉子	玉子	English Tamago matches JMdict+Mozc reading	たまご
+新字体	新字体	English shinjitai matches JMdict+Mozc reading	しんじたい
+技研	技研	English Giken matches JMdict+Mozc reading	ぎけん
+生活者	生活者	English Sei-katsu-sha matches JMdict+Mozc reading	せいかつしゃ
+赤松	赤松	English Akamatsu matches JMdict+Mozc reading	あかまつ
+紫式部	紫式部	English Murasaki Shikibu matches JMdict+Mozc reading	むらさきしきぶ
+雫	雫	English Shizuku matches JMdict+Mozc reading	しずく
+小松	小松	English Komatsu matches JMdict+Mozc reading	こまつ
+九重	九重	English Kokonoe matches JMdict+Mozc reading	ここのえ
+辻	辻	English Tsuji matches JMdict+Mozc reading	つじ
+手鞠	手鞠	English Temari matches JMdict+Mozc reading	てまり
+一番	一番	English Ichiban matches JMdict+Mozc reading	いちばん

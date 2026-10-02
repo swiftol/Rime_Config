@@ -19,6 +19,9 @@ internal sealed class MainForm : Form
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool RemoveClipboardFormatListener(IntPtr hwnd);
 
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool ShowScrollBar(IntPtr hwnd, int bar, bool show);
+
     private readonly PhraseStore _phraseStore = new();
     private readonly SettingsStore _settings;
     private readonly ChineseCorrectionStore _chineseCorrections;
@@ -177,6 +180,8 @@ internal sealed class MainForm : Form
         hotkeys.Click += (_, _) => ShowHotkeys();
         var sentenceTranslation = menu.Items.Add("实时句子翻译");
         sentenceTranslation.Click += (_, _) => ShowSentenceTranslation();
+        var cloudCandidates = menu.Items.Add("Google 云候选（试验）");
+        cloudCandidates.Click += (_, _) => ShowGoogleCloudCandidates();
         button.Click += (_, _) => menu.Show(button, new Point(button.Width - menu.Width, button.Height));
         _navButtons["more"] = button;
         parent.Controls.Add(button);
@@ -184,7 +189,7 @@ internal sealed class MainForm : Form
 
     private void SelectNav(string key)
     {
-        if (key is "phrases" or "hotkeys" or "sentence-translation") key = "more";
+        if (key is "phrases" or "hotkeys" or "sentence-translation" or "google-cloud") key = "more";
         foreach (var pair in _navButtons)
         {
             pair.Value.BackColor = pair.Key == key ? Theme.AccentDark : Theme.Sidebar;
@@ -212,7 +217,7 @@ internal sealed class MainForm : Form
         // Fixed 38px title labels clip the bottom of 20pt CJK glyphs at
         // 125%/150% Windows scaling.  Reserve the actual scaled line height.
         var panel = new Panel { Height = 96, BackColor = Theme.Window };
-        panel.Controls.Add(new Label
+        var titleLabel = new Label
         {
             Text = title,
             Left = 0,
@@ -220,9 +225,10 @@ internal sealed class MainForm : Form
             Width = 680,
             Height = 52,
             Font = Theme.Font(20, FontStyle.Bold),
-            ForeColor = Theme.Text
-        });
-        panel.Controls.Add(new Label
+            ForeColor = Theme.Text,
+            AutoEllipsis = true
+        };
+        var subtitleLabel = new Label
         {
             Text = subtitle,
             Left = 1,
@@ -230,8 +236,18 @@ internal sealed class MainForm : Form
             Width = 760,
             Height = 31,
             Font = Theme.Font(9.5f),
-            ForeColor = Theme.Muted
-        });
+            ForeColor = Theme.Muted,
+            AutoEllipsis = true
+        };
+        panel.Controls.Add(titleLabel);
+        panel.Controls.Add(subtitleLabel);
+        void FitHeading()
+        {
+            titleLabel.Width = Math.Max(80, panel.ClientSize.Width);
+            subtitleLabel.Width = Math.Max(80, panel.ClientSize.Width - 1);
+        }
+        panel.SizeChanged += (_, _) => FitHeading();
+        FitHeading();
         return panel;
     }
 
@@ -606,10 +622,13 @@ internal sealed class MainForm : Form
             WrapContents = false, BackColor = Theme.Window, Padding = new Padding(0, 6, 8, 22)
         };
 
-        var annotationCard = SettingsGroupCard("翻译注释", "控制候选词下方显示的内容。", 280);
+        var annotationCard = SettingsGroupCard("翻译注释", "控制候选词下方显示的内容。", 350);
         var en = AddSwitchRow(annotationCard, "显示英文注释", "候选词下方显示简短英文释义", "Ctrl + Alt + E", values.English, 70);
         var ja = AddSwitchRow(annotationCard, "显示日文注释", "候选词下方显示日语释义", "Ctrl + Alt + J", values.Japanese, 140);
+        en.AccessibleName = "显示英文注释";
+        ja.AccessibleName = "显示日文注释";
         var singleCharacterAnnotations = AddSwitchRow(annotationCard, "单字候选显示注释", "关闭后单个汉字、假名或字母只显示候选文字", "", values.SingleCharacterAnnotations, 210);
+        var directJapaneseReading = AddSwitchRow(annotationCard, "显示日语直输读音", "只控制正常日语输入；中文翻译和模糊匹配仍显示假名", "", values.DirectJapaneseReading, 280);
 
         var inputCard = SettingsGroupCard("输入码显示", "控制字母显示在应用输入框还是候选窗。", 210);
         var inlinePreedit = AddSwitchRow(inputCard, "输入字母显示在应用输入框", "候选窗只保留候选词，关闭后恢复顶部输入码", "", values.InlinePreedit, 70);
@@ -628,42 +647,68 @@ internal sealed class MainForm : Form
         var expandedCommentWidth = expanded.First;
         var expandedCommentAlignLabel = expanded.Second;
 
-        var filterCard = SettingsGroupCard("候选过滤与续输", "减少生僻单字干扰，并控制日语分段输入。", 210);
-        var rareThreshold = AddNumberRow(filterCard, "生僻单字过滤门槛", "0=不过滤；数值越高，隐藏的低频单字越多（建议 4000）", _settings.ReadRareSingleCharThreshold(), 0, 50000, 500, 70);
-        var continuation = AddSwitchRow(filterCard, "日语续输锁定", "前段选中日语后，剩余编码只匹配日语", "", values.JapaneseContinuationLock, 140);
+        var filterCard = SettingsGroupCard("候选过滤与续输", "管理表情位置、日语联想、单字过滤和日语分段输入。", 420);
+        var prefixCompletionRow = AddDualSwitchRow(filterCard, "日语联想", "关闭后不生成任何未完成罗马字的日语补全；完整日语仍可转换",
+            "启用联想", values.JapanesePrefixCompletion, "显示剩余码", values.JapanesePrefixCompletionSuffix, 70);
+        var prefixCompletion = prefixCompletionRow.First;
+        var prefixCompletionSuffix = prefixCompletionRow.Second;
+        var prefixCompletionJapaneseFirst = AddSwitchRow(filterCard, "日语联想优先", "仅在启用联想时生效；关闭后中文联想排前，日语联想仍保留", "", values.JapanesePrefixCompletionJapaneseFirst, 140);
+        var rareThreshold = AddNumberRow(filterCard, "生僻单字过滤门槛", "0=不过滤；数值越高，隐藏的低频单字越多（建议 4000）", _settings.ReadRareSingleCharThreshold(), 0, 50000, 500, 210);
+        var emojiSecondPosition = AddSwitchRow(filterCard, "Emoji 固定第二候选", "开启后即使已经学习或高频，也不占用第一候选", "", values.EmojiSecondPosition, 280);
+        var continuation = AddSwitchRow(filterCard, "日语续输锁定", "前段选中日语后，剩余编码只匹配日语", "", values.JapaneseContinuationLock, 350);
 
         var footer = new RoundedPanel { Height = 70, BackColor = Theme.Surface, Radius = 12, Margin = new Padding(0, 0, 0, 8) };
-        var apply = PrimaryButton("应用并部署", 24, 16, 132);
+        var apply = PrimaryButton("应用设置", 24, 16, 118);
         footer.Controls.Add(apply);
         list.Controls.AddRange([annotationCard, inputCard, keyCard, expandedCard, filterCard, footer]);
 
+        var fittingCards = false;
         void FitCards()
         {
+            if (fittingCards) return;
+            fittingCards = true;
+            var verticalOffset = Math.Max(0, -list.AutoScrollPosition.Y);
             var width = Math.Max(560, list.ClientSize.Width - list.Padding.Horizontal - SystemInformation.VerticalScrollBarWidth - 8);
             foreach (Control control in list.Controls) control.Width = width;
+            // FlowLayoutPanel retains the old horizontal extent after all
+            // children shrink.  Rebuild its scroll state so a narrow window
+            // keeps only the useful vertical scrollbar.
+            list.AutoScroll = false;
+            list.AutoScroll = true;
+            list.PerformLayout();
+            if (list.IsHandleCreated)
+                ShowScrollBar(list.Handle, 0, false); // SB_HORZ
+            if (verticalOffset > 0)
+                list.AutoScrollPosition = new Point(0, verticalOffset);
+            fittingCards = false;
         }
         list.Resize += (_, _) => FitCards();
 
-        async Task SaveAndApplyAsync(bool deploy)
+        async Task SaveAndApplyAsync(bool refreshCompiledLayout)
         {
             // Persist before the first await so navigating to another page can
             // never recreate these switches from stale values.
-            _settings.SaveInputOptions(new InputOptions(
-                en.Checked, ja.Checked, singleCharacterAnnotations.Checked, inlinePreedit.Checked, inlineRaw.Checked,
+            var options = new InputOptions(
+                en.Checked, ja.Checked, directJapaneseReading.Checked, singleCharacterAnnotations.Checked,
+                emojiSecondPosition.Checked,
+                prefixCompletion.Checked, prefixCompletionSuffix.Checked,
+                prefixCompletionJapaneseFirst.Checked,
+                inlinePreedit.Checked, inlineRaw.Checked,
                 enterSubmitsToApp.Checked, spaceMode == 1, spaceMode == 2, longPressReading.Checked,
                 altReading.Checked,
                 expandedCommentWidth.Checked, expandedCommentAlignLabel.Checked, continuation.Checked, values.Fuzzy,
                 values.FuzzySokuon, values.FuzzyLongI, values.FuzzyLongU,
                 values.FuzzyLongMark, values.FuzzyChiJi, values.FuzzyHuFu,
                 values.FuzzyShuSho, values.FuzzyKeKai, values.FuzzyKeKaeGae,
-                values.FuzzySeiSai, values.FuzzyDakuten, values.Sentence));
-            if (deploy)
+                values.FuzzySeiSai, values.FuzzyDakuten, values.ParticleWaHa,
+                values.Sentence, values.GoogleCloudCandidates);
+            _settings.SaveInputOptions(options);
+            if (refreshCompiledLayout)
             {
                 _settings.SaveRareSingleCharThreshold((int)rareThreshold.Value);
-                await RimeRuntime.DeployAsync();
+                _settings.RefreshBuiltInputLayout(options, (int)rareThreshold.Value);
             }
-            else
-                await RimeRuntime.RestartServerAsync();
+            await RimeRuntime.RestartServerAsync();
         }
         async void SaveImmediately(object? sender, EventArgs e)
         {
@@ -682,14 +727,32 @@ internal sealed class MainForm : Form
                 }
             }
         }
-        en.CheckedChanged += SaveImmediately;
-        ja.CheckedChanged += SaveImmediately;
-        singleCharacterAnnotations.CheckedChanged += SaveImmediately;
+        void SaveAnnotationImmediately(object? sender, EventArgs e)
+        {
+            try
+            {
+                _settings.SaveAnnotationOptions(en.Checked, ja.Checked,
+                    directJapaneseReading.Checked, singleCharacterAnnotations.Checked);
+                apply.Text = "已生效";
+            }
+            catch (Exception error)
+            {
+                MessageBox.Show(this, error.Message, "注释设置未生效",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        en.CheckedChanged += SaveAnnotationImmediately;
+        ja.CheckedChanged += SaveAnnotationImmediately;
+        directJapaneseReading.CheckedChanged += SaveAnnotationImmediately;
+        singleCharacterAnnotations.CheckedChanged += SaveAnnotationImmediately;
+        prefixCompletion.CheckedChanged += SaveImmediately;
+        prefixCompletionSuffix.CheckedChanged += SaveImmediately;
+        emojiSecondPosition.CheckedChanged += SaveImmediately;
         async void InlineStyleChanged(object? sender, EventArgs e)
         {
             try
             {
-                apply.Text = "正在部署…";
+                apply.Text = "正在刷新…";
                 apply.Enabled = false;
                 await SaveAndApplyAsync(true);
             }
@@ -715,7 +778,7 @@ internal sealed class MainForm : Form
                 SetSegmentedChoice(spaceChoices, spaceMode);
                 try
                 {
-                    apply.Text = "正在部署…";
+                    apply.Text = "正在刷新…";
                     apply.Enabled = false;
                     await SaveAndApplyAsync(true);
                 }
@@ -735,7 +798,7 @@ internal sealed class MainForm : Form
         {
             try
             {
-                apply.Text = "正在部署…";
+                apply.Text = "正在刷新…";
                 apply.Enabled = false;
                 await SaveAndApplyAsync(true);
             }
@@ -752,6 +815,26 @@ internal sealed class MainForm : Form
         continuation.CheckedChanged += SaveImmediately;
         apply.Click += async (_, _) =>
         {
+            var current = new InputOptions(
+                en.Checked, ja.Checked, directJapaneseReading.Checked, singleCharacterAnnotations.Checked,
+                emojiSecondPosition.Checked,
+                prefixCompletion.Checked, prefixCompletionSuffix.Checked,
+                prefixCompletionJapaneseFirst.Checked,
+                inlinePreedit.Checked, inlineRaw.Checked,
+                enterSubmitsToApp.Checked, spaceMode == 1, spaceMode == 2, longPressReading.Checked,
+                altReading.Checked,
+                expandedCommentWidth.Checked, expandedCommentAlignLabel.Checked, continuation.Checked, values.Fuzzy,
+                values.FuzzySokuon, values.FuzzyLongI, values.FuzzyLongU,
+                values.FuzzyLongMark, values.FuzzyChiJi, values.FuzzyHuFu,
+                values.FuzzyShuSho, values.FuzzyKeKai, values.FuzzyKeKaeGae,
+                values.FuzzySeiSai, values.FuzzyDakuten, values.ParticleWaHa,
+                values.Sentence, values.GoogleCloudCandidates);
+            if (current == _settings.ReadInputOptions() &&
+                (int)rareThreshold.Value == _settings.ReadRareSingleCharThreshold())
+            {
+                apply.Text = "已生效";
+                return;
+            }
             await RunBusyAsync(apply, "正在应用…", async () =>
             {
                 await SaveAndApplyAsync(true);
@@ -782,7 +865,8 @@ internal sealed class MainForm : Form
             ("け / かい：ke / kai", "例如 seke 也能匹配 世界（sekai）", values.FuzzyKeKai),
             ("ke / kae / gae", "例如 kikeru 也能匹配 着替える（kigaeru）", values.FuzzyKeKaeGae),
             ("せい / さい：sei / sai", "sei 与 sai 可互相容错匹配", values.FuzzySeiSai),
-            ("浊音 / 半浊音", "t/d、p/b/h 容错，可与促音组合", values.FuzzyDakuten)
+            ("浊音 / 半浊音", "t/d、p/b/h 容错，可与促音组合", values.FuzzyDakuten),
+            ("wa → は（助词自动转换）", "关闭时请输入 ha；开启后句中 wa 可写作 は（同时启用 wh）", values.ParticleWaHa)
         };
 
         var page = new TableLayoutPanel
@@ -842,7 +926,8 @@ internal sealed class MainForm : Form
                 FuzzyKeKai = toggles[7].Checked,
                 FuzzyKeKaeGae = toggles[8].Checked,
                 FuzzySeiSai = toggles[9].Checked,
-                FuzzyDakuten = toggles[10].Checked
+                FuzzyDakuten = toggles[10].Checked,
+                ParticleWaHa = toggles[11].Checked
             });
             await RimeRuntime.RestartServerAsync();
         });
@@ -944,6 +1029,8 @@ internal sealed class MainForm : Form
 
         var japanese = _customFuzzyRules.Load(FuzzyLanguage.Japanese);
         var chinese = _customFuzzyRules.Load(FuzzyLanguage.Chinese);
+        var originalJapanese = japanese.ToList();
+        var originalChinese = chinese.ToList();
         var current = FuzzyLanguage.Japanese;
 
         var page = new TableLayoutPanel
@@ -963,7 +1050,7 @@ internal sealed class MainForm : Form
         var jaTab = SecondaryButton("日语规则", 0, 8, 108);
         var cnTab = SecondaryButton("中文规则", 118, 8, 108);
         var add = PrimaryButton("＋ 新增规则", 246, 8, 126);
-        var apply = PrimaryButton("应用并部署", 382, 8, 132);
+        var apply = PrimaryButton("应用设置", 382, 8, 118);
         toolbar.Controls.AddRange([jaTab, cnTab, add, apply]);
 
         var list = new FlowLayoutPanel
@@ -1056,11 +1143,18 @@ internal sealed class MainForm : Form
             ActiveRules().Add(dialog.Result);
             Render();
         };
-        apply.Click += async (_, _) => await RunBusyAsync(apply, "正在部署…", async () =>
+        apply.Click += async (_, _) => await RunBusyAsync(apply, "正在应用…", async () =>
         {
+            var japaneseChanged = !japanese.SequenceEqual(originalJapanese);
+            var chineseChanged = !chinese.SequenceEqual(originalChinese);
             _customFuzzyRules.Save(FuzzyLanguage.Japanese, japanese);
             _customFuzzyRules.Save(FuzzyLanguage.Chinese, chinese);
-            await RimeRuntime.DeployAsync();
+            if (chineseChanged)
+                await RimeRuntime.DeployAsync();
+            else if (japaneseChanged)
+                await RimeRuntime.RestartServerAsync();
+            originalJapanese = japanese.ToList();
+            originalChinese = chinese.ToList();
         });
 
         page.Controls.Add(heading, 0, 0);
@@ -1090,19 +1184,65 @@ internal sealed class MainForm : Form
         var commonPhraseText = AddColorRow(card, "常用语文字颜色", "常用语使用独立颜色；也可选择“保持原版”", values.CommonPhraseText, 560);
         var commonPhraseBack = AddColorRow(card, "常用语底色", "常用语使用独立底色；也可选择“保持原版”", values.CommonPhraseBackground, 630);
         var apply = PrimaryButton("应用外观", 24, 710, 118);
-        apply.Click += async (_, _) =>
+        apply.Click += (_, _) =>
         {
-            await RunBusyAsync(apply, "正在部署…", async () =>
+            try
             {
-                _settings.SaveAppearance(new AppearanceOptions(
+                var options = new AppearanceOptions(
                     (int)width.Value, (int)font.Value, (int)spacing.Value, (int)padding.Value,
                     (Color)chineseText.Tag!, (Color)chineseBack.Tag!,
                     (Color)japaneseText.Tag!, (Color)japaneseBack.Tag!,
-                    (Color)commonPhraseText.Tag!, (Color)commonPhraseBack.Tag!));
-                await RimeRuntime.DeployAsync();
-            });
+                    (Color)commonPhraseText.Tag!, (Color)commonPhraseBack.Tag!);
+                _settings.SaveAppearanceHot(options);
+                apply.Text = "已生效";
+            }
+            catch (Exception error)
+            {
+                MessageBox.Show(this, error.Message, "外观设置未生效",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         };
         card.Controls.Add(apply);
+        _content.Controls.Add(card);
+        card.BringToFront();
+    }
+
+    private void ShowGoogleCloudCandidates()
+    {
+        SelectNav("google-cloud");
+        ClearContent();
+        BuildHeading("Google 云候选（试验）", "本地候选立即显示；云端建议目前在下一次按键时补入第二项。");
+        var values = _settings.ReadInputOptions();
+        var card = new RoundedPanel
+        {
+            Dock = DockStyle.Top,
+            Height = 180,
+            BackColor = Theme.Surface,
+            Radius = 12
+        };
+        var cloud = AddSwitchRow(card, "启用云候选", "会把正在输入的罗马字拼写发送给 Google；默认关闭", "", values.GoogleCloudCandidates, 0);
+        var status = new Label
+        {
+            Text = values.GoogleCloudCandidates ? "当前已开启" : "当前已关闭",
+            Left = 24, Top = 100, Width = 500, Height = 30,
+            Font = Theme.Font(9.5f), ForeColor = Theme.Muted
+        };
+        cloud.CheckedChanged += async (_, _) =>
+        {
+            cloud.Enabled = false;
+            try
+            {
+                var current = _settings.ReadInputOptions();
+                _settings.SaveInputOptions(current with { GoogleCloudCandidates = cloud.Checked });
+                await RimeRuntime.RestartServerAsync();
+                status.Text = cloud.Checked ? "当前已开启" : "当前已关闭";
+            }
+            finally
+            {
+                cloud.Enabled = true;
+            }
+        };
+        card.Controls.Add(status);
         _content.Controls.Add(card);
         card.BringToFront();
     }
@@ -1111,22 +1251,22 @@ internal sealed class MainForm : Form
     {
         SelectNav("sentence-translation");
         ClearContent();
-        BuildHeading("实时句子翻译（开发中）", "离线翻译服务仍在开发，默认关闭以避免输入卡顿。");
+        BuildHeading("小牛双语整句翻译", "停顿后同时显示两种译文；默认关闭，开启后输入内容会发送给小牛翻译。");
         var values = _settings.ReadInputOptions();
         var card = new RoundedPanel
         {
             Dock = DockStyle.Top,
-            Height = 170,
+            Height = 350,
             BackColor = Theme.Surface,
             Radius = 12
         };
-        var sentence = AddSwitchRow(card, "启用实时句子翻译", "逐词更新整句的英文与日文翻译", "Ctrl + Alt + T", values.Sentence, 0);
+        var sentence = AddSwitchRow(card, "启用小牛双语翻译", "中文译成日语、英语；日语译成中文、英语。每句请求两次。", "Ctrl + Alt + T", values.Sentence, 0);
         var status = new Label
         {
-            Text = values.Sentence ? "当前已开启" : "当前已关闭（推荐）",
+            Text = values.Sentence ? "当前已开启" : "当前已关闭（默认）",
             Left = 24,
             Top = 92,
-            Width = 420,
+            Width = 700,
             Height = 30,
             Font = Theme.Font(9.5f),
             ForeColor = Theme.Muted
@@ -1137,16 +1277,86 @@ internal sealed class MainForm : Form
             try
             {
                 var current = _settings.ReadInputOptions();
+                if (sentence.Checked && !_settings.HasNiuCredentials())
+                {
+                    status.Text = "请先保存小牛 App ID 和 API Key。";
+                    sentence.Checked = false;
+                    return;
+                }
                 _settings.SaveInputOptions(current with { Sentence = sentence.Checked });
                 await RimeRuntime.RestartServerAsync();
-                status.Text = sentence.Checked ? "当前已开启" : "当前已关闭（推荐）";
+                status.Text = sentence.Checked ? "当前已开启" : "当前已关闭（默认）";
             }
             finally
             {
                 sentence.Enabled = true;
             }
         };
+        var keyLabel = new Label
+        {
+            Text = "小牛 App ID 和 API Key（Key 受当前 Windows 用户加密保护）",
+            Left = 24, Top = 132, Width = 650, Height = 25,
+            Font = Theme.Font(9.5f), ForeColor = Theme.Text
+        };
+        var appIdInput = new TextBox
+        {
+            Left = 24, Top = 162, Width = 200, Height = 32,
+            BackColor = Theme.Input, ForeColor = Theme.Text,
+            BorderStyle = BorderStyle.FixedSingle, PlaceholderText = "App ID"
+        };
+        var keyInput = new TextBox
+        {
+            Left = 235, Top = 162, Width = 340, Height = 32,
+            UseSystemPasswordChar = true, BackColor = Theme.Input,
+            ForeColor = Theme.Text, BorderStyle = BorderStyle.FixedSingle,
+            PlaceholderText = _settings.HasNiuCredentials() ? "已保存（输入新凭据可替换）" : "API Key"
+        };
+        var saveKey = PrimaryButton("保存凭据", 585, 160, 110);
+        saveKey.Click += (_, _) =>
+        {
+            try
+            {
+                _settings.SaveNiuCredentials(appIdInput.Text, keyInput.Text);
+                appIdInput.Clear();
+                keyInput.Clear();
+                keyInput.PlaceholderText = "已保存（输入新凭据可替换）";
+                status.Text = "小牛凭据已保存，可开启翻译。";
+            }
+            catch (Exception error) { status.Text = error.Message; }
+        };
+        var clearKey = PrimaryButton("删除凭据", 24, 214, 110);
+        clearKey.Click += (_, _) =>
+        {
+            if (sentence.Checked) sentence.Checked = false;
+            _settings.ClearNiuCredentials();
+            appIdInput.Clear();
+            keyInput.Clear();
+            keyInput.PlaceholderText = "API Key";
+            status.Text = "凭据已删除，翻译已关闭。";
+        };
+        var testKey = PrimaryButton("测试连接", 365, 214, 110);
+        testKey.Click += async (_, _) =>
+        {
+            testKey.Enabled = false;
+            status.Text = "正在测试小牛翻译……";
+            try { status.Text = "连接成功，译文：" + await _settings.TestNiuConnectionAsync(); }
+            catch (Exception error) { status.Text = "测试失败：" + error.Message; }
+            finally { testKey.Enabled = true; }
+        };
+        var attribution = new Label
+        {
+            Text = "由小牛翻译提供技术支持 · 未启用时不会发送文字",
+            Left = 24, Top = 290, Width = 680, Height = 25,
+            Font = Theme.Font(9f), ForeColor = Theme.Muted
+        };
         card.Controls.Add(status);
+        card.Controls.Add(keyLabel);
+        card.Controls.Add(appIdInput);
+        card.Controls.Add(keyInput);
+        card.Controls.Add(saveKey);
+        card.Controls.Add(clearKey);
+        card.Controls.Add(testKey);
+        card.Controls.Add(attribution);
         _content.Controls.Add(card);
         card.BringToFront();
     }
@@ -1227,11 +1437,13 @@ internal sealed class MainForm : Form
             Text = title, Left = 24, Top = 14, Width = 320, Height = 28,
             Font = Theme.Font(11.5f, FontStyle.Bold), ForeColor = Theme.Text
         });
-        card.Controls.Add(new Label
+        var cardDescription = new Label
         {
             Text = description, Left = 24, Top = 41, Width = 620, Height = 23,
-            Font = Theme.Font(9), ForeColor = Theme.Muted
-        });
+            Font = Theme.Font(9), ForeColor = Theme.Muted, AutoEllipsis = true,
+            Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top
+        };
+        card.Controls.Add(cardDescription);
         card.Controls.Add(new Divider
         {
             Left = 24, Top = 69, Width = card.Width - 48,
@@ -1243,16 +1455,19 @@ internal sealed class MainForm : Form
     private static FlatButton[] AddSegmentedChoiceRow(Control parent, string title, string description,
         string[] choices, int selected, int top)
     {
-        parent.Controls.Add(new Label
+        var titleLabel = new Label
         {
             Text = title, Left = 24, Top = top + 14, Width = 180, Height = 26,
-            Font = Theme.Font(10.5f, FontStyle.Bold), ForeColor = Theme.Text
-        });
-        parent.Controls.Add(new Label
+            Font = Theme.Font(10.5f, FontStyle.Bold), ForeColor = Theme.Text,
+            AutoEllipsis = true
+        };
+        var descriptionLabel = new Label
         {
             Text = description, Left = 24, Top = top + 40, Width = 180, Height = 23,
-            Font = Theme.Font(9), ForeColor = Theme.Muted
-        });
+            Font = Theme.Font(9), ForeColor = Theme.Muted, AutoEllipsis = true
+        };
+        parent.Controls.Add(titleLabel);
+        parent.Controls.Add(descriptionLabel);
         parent.Controls.Add(new Divider
         {
             Left = 24, Top = top, Width = parent.Width - 48,
@@ -1268,9 +1483,28 @@ internal sealed class MainForm : Form
         foreach (var button in buttons) parent.Controls.Add(button);
         void Position()
         {
-            var total = buttons.Length * 126 + (buttons.Length - 1) * 8;
-            var left = Math.Max(230, parent.ClientSize.Width - total - 24);
-            for (var i = 0; i < buttons.Length; i++) buttons[i].Left = left + i * 134;
+            const int gap = 8;
+            var naturalTotal = buttons.Length * 126 + (buttons.Length - 1) * gap;
+            int left;
+            int buttonWidth;
+            if (parent.ClientSize.Width >= 230 + naturalTotal + 24)
+            {
+                buttonWidth = 126;
+                left = parent.ClientSize.Width - naturalTotal - 24;
+            }
+            else
+            {
+                left = 180;
+                buttonWidth = Math.Max(88,
+                    (parent.ClientSize.Width - left - 24 - (buttons.Length - 1) * gap) / buttons.Length);
+            }
+            for (var i = 0; i < buttons.Length; i++)
+            {
+                buttons[i].Width = buttonWidth;
+                buttons[i].Left = left + i * (buttonWidth + gap);
+            }
+            titleLabel.Width = Math.Max(80, left - titleLabel.Left - 12);
+            descriptionLabel.Width = Math.Max(80, left - descriptionLabel.Left - 12);
         }
         parent.SizeChanged += (_, _) => Position();
         Position();
@@ -1290,16 +1524,19 @@ internal sealed class MainForm : Form
         string title, string description, string firstLabel, bool firstValue,
         string secondLabel, bool secondValue, int top)
     {
-        parent.Controls.Add(new Label
+        var titleLabel = new Label
         {
             Text = title, Left = 24, Top = top + 14, Width = 240, Height = 26,
-            Font = Theme.Font(10.5f, FontStyle.Bold), ForeColor = Theme.Text
-        });
-        parent.Controls.Add(new Label
+            Font = Theme.Font(10.5f, FontStyle.Bold), ForeColor = Theme.Text,
+            AutoEllipsis = true
+        };
+        parent.Controls.Add(titleLabel);
+        var descriptionLabel = new Label
         {
             Text = description, Left = 24, Top = top + 40, Width = 360, Height = 23,
-            Font = Theme.Font(9), ForeColor = Theme.Muted
-        });
+            Font = Theme.Font(9), ForeColor = Theme.Muted, AutoEllipsis = true
+        };
+        parent.Controls.Add(descriptionLabel);
         parent.Controls.Add(new Divider
         {
             Left = 24, Top = top, Width = parent.Width - 48,
@@ -1307,15 +1544,19 @@ internal sealed class MainForm : Form
         });
         var firstText = new Label { Text = firstLabel, Top = top + 25, Width = 76, Height = 24, Font = Theme.Font(9), ForeColor = Theme.Text, Anchor = AnchorStyles.Top };
         var secondText = new Label { Text = secondLabel, Top = top + 25, Width = 76, Height = 24, Font = Theme.Font(9), ForeColor = Theme.Text, Anchor = AnchorStyles.Top };
+        firstText.Width = TextRenderer.MeasureText(firstLabel, firstText.Font).Width + 4;
+        secondText.Width = TextRenderer.MeasureText(secondLabel, secondText.Font).Width + 4;
         var first = new ToggleSwitch { Top = top + 21, Checked = firstValue, Anchor = AnchorStyles.Top };
         var second = new ToggleSwitch { Top = top + 21, Checked = secondValue, Anchor = AnchorStyles.Top };
         parent.Controls.AddRange([firstText, first, secondText, second]);
         void Position()
         {
-            second.Left = Math.Max(488, parent.ClientSize.Width - 76);
-            secondText.Left = second.Left - 82;
-            first.Left = secondText.Left - 68;
-            firstText.Left = first.Left - 82;
+            second.Left = parent.ClientSize.Width - 24 - second.Width;
+            secondText.Left = second.Left - 8 - secondText.Width;
+            first.Left = secondText.Left - 20 - first.Width;
+            firstText.Left = first.Left - 8 - firstText.Width;
+            titleLabel.Width = Math.Max(80, firstText.Left - titleLabel.Left - 12);
+            descriptionLabel.Width = Math.Max(80, firstText.Left - descriptionLabel.Left - 12);
         }
         parent.SizeChanged += (_, _) => Position();
         Position();
@@ -1336,8 +1577,10 @@ internal sealed class MainForm : Form
             ForeColor = Theme.Muted,
             Anchor = AnchorStyles.Top
         };
-        parent.Controls.Add(new Label { Text = title, Left = 24, Top = top + 14, Width = 310, Height = 26, Font = Theme.Font(10.5f, FontStyle.Bold), ForeColor = Theme.Text });
-        parent.Controls.Add(new Label { Text = description, Left = 24, Top = top + 40, Width = 430, Height = 23, Font = Theme.Font(9), ForeColor = Theme.Muted });
+        var titleLabel = new Label { Text = title, Left = 24, Top = top + 14, Width = 310, Height = 26, Font = Theme.Font(10.5f, FontStyle.Bold), ForeColor = Theme.Text, AutoEllipsis = true };
+        var descriptionLabel = new Label { Text = description, Left = 24, Top = top + 40, Width = 430, Height = 23, Font = Theme.Font(9), ForeColor = Theme.Muted, AutoEllipsis = true };
+        parent.Controls.Add(titleLabel);
+        parent.Controls.Add(descriptionLabel);
         parent.Controls.Add(shortcutLabel);
         if (top > 0) parent.Controls.Add(new Divider { Left = 24, Top = top, Width = parent.Width - 48, Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top });
         parent.Controls.Add(toggle);
@@ -1346,6 +1589,9 @@ internal sealed class MainForm : Form
         {
             toggle.Left = Math.Max(488, parent.ClientSize.Width - 76);
             shortcutLabel.Left = Math.Max(326, toggle.Left - 164);
+            var textRight = string.IsNullOrEmpty(shortcut) ? toggle.Left : shortcutLabel.Left;
+            titleLabel.Width = Math.Max(80, textRight - titleLabel.Left - 12);
+            descriptionLabel.Width = Math.Max(80, textRight - descriptionLabel.Left - 12);
         }
 
         parent.SizeChanged += (_, _) => PositionRightControls();
@@ -1371,10 +1617,20 @@ internal sealed class MainForm : Form
             Font = Theme.Font(10),
             Anchor = AnchorStyles.Top | AnchorStyles.Right
         };
-        parent.Controls.Add(new Label { Text = title, Left = 24, Top = top + 14, Width = 310, Height = 26, Font = Theme.Font(10.5f, FontStyle.Bold), ForeColor = Theme.Text });
-        parent.Controls.Add(new Label { Text = description, Left = 24, Top = top + 40, Width = 520, Height = 23, Font = Theme.Font(9), ForeColor = Theme.Muted });
+        var titleLabel = new Label { Text = title, Left = 24, Top = top + 14, Width = 310, Height = 26, Font = Theme.Font(10.5f, FontStyle.Bold), ForeColor = Theme.Text, AutoEllipsis = true };
+        var descriptionLabel = new Label { Text = description, Left = 24, Top = top + 40, Width = 520, Height = 23, Font = Theme.Font(9), ForeColor = Theme.Muted, AutoEllipsis = true };
+        parent.Controls.Add(titleLabel);
+        parent.Controls.Add(descriptionLabel);
         if (top > 0) parent.Controls.Add(new Divider { Left = 24, Top = top, Width = parent.Width - 48, Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top });
         parent.Controls.Add(number);
+        void PositionText()
+        {
+            var available = Math.Max(80, number.Left - 24 - 12);
+            titleLabel.Width = available;
+            descriptionLabel.Width = available;
+        }
+        parent.SizeChanged += (_, _) => PositionText();
+        PositionText();
         return number;
     }
 

@@ -1,0 +1,77 @@
+# Rime schema
+# encoding: utf-8
+
+# Preserve the established Chinese, UI and key behavior from the 1.1 mixed
+# scheme, replacing only its Japanese candidate engines with local Mozc.
+__include: rime_ice_japanese.schema.yaml:/
+
+schema:
+  schema_id: rime_ice_japanese_mozc
+  name: 中日输入法
+  version: "1.1-mozc"
+  description: |
+    雾凇拼音中文候选 + Google Mozc 日语候选。
+    与原 1.1 方案相互独立，可通过 F4 切换。
+
+# Settings are owned by the dedicated settings panel. Keep the schema switcher
+# limited to the two input methods; option values still live in user.yaml and
+# can be changed by the panel or existing shortcuts.
+switches: []
+
+engine:
+  translators:
+    - lua_translator@*japanese_input_table_translator
+    - punct_translator
+    - table_translator@builtin_shortcuts
+    - lua_translator@emoji_learning_translator
+    - lua_translator@chinese_abbreviation_learning_translator
+    - lua_translator@common_phrase_translator
+    - lua_translator@*mozc_v2_prefix_translator
+    - script_translator@chinese_exact_translator
+    - lua_translator@*mozc_v2_translator
+    - lua_translator@*japanese_fuzzy_translator
+    - script_translator
+    - lua_translator@*date_translator
+    - lua_translator@*lunar
+    - lua_translator@*uuid
+    - table_translator@custom_phrase
+    - table_translator@melt_eng
+    - table_translator@cn_en
+    - table_translator@radical_lookup
+    - lua_translator@*unicode
+    - lua_translator@*number_translator
+    - lua_translator@*calc_translator
+  filters:
+    - lua_filter@*japanese_input_table_filter
+    - lua_filter@*corrector
+    - reverse_lookup_filter@radical_reverse_lookup
+    - lua_filter@*autocap_filter
+    - lua_filter@*v_filter
+    - lua_filter@*pin_cand_filter
+    - lua_filter@*long_word_filter
+    - lua_filter@*reduce_english_filter
+    - simplifier@emoji
+    - simplifier@traditionalize
+    - lua_filter@*search@radical_pinyin
+    - lua_filter@*rare_single_char_filter
+    # The fuzzy filter adds hidden language markers.  Route on those markers
+    # immediately afterwards, before the annotation filter strips/replaces
+    # them for display.
+    - lua_filter@japanese_fuzzy_filter
+    - lua_filter@mozc_candidate_order_filter
+    - lua_filter@mozc_mixed_filter
+    - lua_filter@direct_japanese_reading_filter
+    - lua_filter@translation_annotation_filter
+    - lua_filter@common_phrase_filter
+    - lua_filter@google_cloud_candidate_filter
+    - uniquifier
+    # Uniquifier can append the old scheme/source name to merged Japanese
+    # candidates.  This must be the final filter so it cannot reappear later.
+    - lua_filter@source_label_filter
+
+mozc_v2:
+  # Chinese exact candidates use quality 300 in the inherited 1.1 scheme.
+  # Keep Mozc below them but above assembled/fallback candidates.
+  # Stay immediately below exact Chinese (300), so genuinely ambiguous short
+  # codes such as `moshi` keep “模式” first but expose `もし` on page one.
+  initial_quality: 299

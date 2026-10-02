@@ -1,0 +1,71 @@
+# Rime schema
+# encoding: utf-8
+
+schema:
+  schema_id: japanese_mozc_v2
+  name: 日语 V2*mozc
+  version: "1.1"
+  author:
+    - Google Mozc
+    - Rime 中日直输
+  description: |
+    官方 Mozc 本地转换引擎。F4 可与雾凇中日方案切换；桥接不可用时回退日语词库。
+  dependencies:
+    - japanese
+
+switches: []
+
+engine:
+  processors:
+    - lua_processor@*japanese_fuzzy_learning_processor
+    - ascii_composer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    - lua_translator@*mozc_v2_prefix_translator
+    - lua_translator@*mozc_v2_translator
+    - script_translator@japanese
+  filters:
+    - lua_filter@google_cloud_candidate_filter
+    - uniquifier
+
+speller:
+  alphabet: abcdefghijklmnopqrstuvwxyz-
+  delimiter: " '​"
+
+translator:
+  dictionary: japanese
+  prism: japanese_mozc_v2
+  spelling_hints: 8
+  enable_sentence: true
+  enable_user_dict: false
+
+japanese:
+  dictionary: japanese
+  prism: japanese
+  spelling_hints: 8
+  enable_sentence: true
+  enable_user_dict: false
+
+punctuator:
+  half_shape:
+    "[": "["
+    "]": "]"
+
+key_binder:
+  bindings:
+    - { when: has_menu, accept: bracketright, send: Page_Down }
+    - { when: has_menu, accept: bracketleft, send: Page_Up }
+
+menu:
+  page_size: 9

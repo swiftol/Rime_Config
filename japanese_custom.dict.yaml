@@ -5,6 +5,10 @@ sort: original
 ...
 
 # 日文多拼补充词库
+# 既有词库收录「受水槽 jusuisou」，却将独立的「受水」误标为
+# ukinju。补上规范读音，使复合技术词能按词素连续选入。
+受水	jusui	100
+
 # 常用完整表达：避免 nanno 被自动组句误判为姓氏「南野」。
 なんの意味はない	nannoimiwanai	6000000
 なんの意味はない	nannoimihanai	6000000

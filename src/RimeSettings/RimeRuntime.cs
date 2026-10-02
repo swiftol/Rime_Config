@@ -49,10 +49,10 @@ internal static class RimeRuntime
                     CreateNoWindow = true
                 });
                 if (process is null) throw new InvalidOperationException("无法启动小狼毫部署器。");
-                if (!process.WaitForExit(180000))
+                if (!process.WaitForExit(1800000))
                 {
                     process.Kill();
-                    throw new TimeoutException("小狼毫部署超过 3 分钟，已停止本次部署。");
+                    throw new TimeoutException("小狼毫完整部署超过 30 分钟，已停止本次部署。");
                 }
                 if (process.ExitCode != 0)
                     throw new InvalidOperationException($"小狼毫部署失败，退出代码：{process.ExitCode}");
@@ -60,6 +60,7 @@ internal static class RimeRuntime
             finally
             {
                 StartServer(server);
+                StartMozcBridge(root);
             }
         });
     }
@@ -68,10 +69,12 @@ internal static class RimeRuntime
     {
         await Task.Run(() =>
         {
-            var server = Path.Combine(LocateRoot(), "WeaselServer.exe");
+            var root = LocateRoot();
+            var server = Path.Combine(root, "WeaselServer.exe");
             if (!File.Exists(server)) throw new FileNotFoundException("找不到小狼毫服务程序。", server);
             StopServer();
             StartServer(server);
+            StartMozcBridge(root);
         });
     }
 
@@ -86,4 +89,52 @@ internal static class RimeRuntime
 
     private static void StartServer(string server) =>
         Process.Start(new ProcessStartInfo(server) { UseShellExecute = true, WindowStyle = ProcessWindowStyle.Hidden });
+
+    private static void StartMozcBridge(string root)
+    {
+        var mozcRoot = Path.Combine(root, "mozc");
+        var bridge = Path.Combine(mozcRoot, "MozcBridge.exe");
+        var converter = Path.Combine(mozcRoot, "converter", "converter_main.exe");
+        var romanTable = Path.Combine(mozcRoot, "romanji-hiragana.tsv");
+        if (!File.Exists(bridge) || !File.Exists(converter) || !File.Exists(romanTable)) return;
+
+        foreach (var process in Process.GetProcessesByName("MozcBridge"))
+        {
+            try
+            {
+                if (string.Equals(process.MainModule?.FileName, bridge,
+                                  StringComparison.OrdinalIgnoreCase))
+                    return;
+            }
+            catch { }
+        }
+
+        var profile = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "RimeChineseJapanese", "mozc-v2-profile");
+        var mailbox = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "Rime", "mozc_v2_mailbox");
+        Directory.CreateDirectory(profile);
+        Directory.CreateDirectory(mailbox);
+        string Quote(string value) => "\"" + value + "\"";
+        var arguments = string.Join(" ", new[]
+        {
+            Quote(converter), Quote(mozcRoot), Quote(profile), Quote(romanTable), Quote(mailbox)
+        });
+        try
+        {
+            Process.Start(new ProcessStartInfo(bridge, arguments)
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden
+            });
+        }
+        catch
+        {
+            // Preserve the normal Rime candidate pipeline: V2 will fall back
+            // to its Japanese dictionary when the local bridge cannot start.
+        }
+    }
 }

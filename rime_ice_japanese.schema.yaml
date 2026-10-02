@@ -16,6 +16,7 @@ schema:
     - melt_eng
     - radical_pinyin
     - japanese
+    - rime_ice_japanese_japanese_exact
     - japanese_fuzzy
     - japanese_fuzzy_sokuon
     - japanese_fuzzy_long_i
@@ -34,16 +35,29 @@ switches:
   - name: emoji
     states: [ 💀, 😄 ]
     reset: 1
+  - name: emoji_second_position
+    states: [ 表情可首选, 表情第二 ]
   - name: full_shape
     states: [ 半角, 全角 ]
   - name: show_english_annotation
     states: [ 英关, 英注 ]
   - name: show_japanese_annotation
     states: [ 日关, 日注 ]
+  - name: show_direct_japanese_reading
+    states: [ 直输读音关, 直输读音开 ]
+    reset: 0
   - name: show_single_character_annotation
     states: [ 单字注关, 单字注 ]
   - name: japanese_continuation_lock
     states: [ 续输混合, 日语续输 ]
+    reset: 1
+  - name: japanese_prefix_completion_disabled
+    states: [ 日语联想开, 日语联想关 ]
+    reset: 1
+  - name: japanese_prefix_completion_suffix
+    states: [ 余码隐藏, 余码显示 ]
+  - name: japanese_prefix_completion_japanese_first
+    states: [ 中文联想优先, 日语联想优先 ]
     reset: 1
 
 # 输入引擎
@@ -62,6 +76,9 @@ switches:
     states: [ ちじ关, ちじ开 ]
   - name: japanese_fuzzy_hu_fu
     states: [ hufu关, hufu开 ]
+  - name: japanese_particle_wa_ha
+    states: [ wa/ha关, wa/ha开 ]
+    reset: 0
   - name: japanese_fuzzy_shu_sho
     states: [ shusho关, shusho开 ]
   - name: japanese_fuzzy_dakuten
@@ -71,12 +88,16 @@ switches:
     reset: 1
   - name: sentence_translation
     states: [ 句译关, 句译开 ]
-    reset: 0
 
 engine:
   processors:
+    - lua_processor@*panel_option_defaults
+    - lua_processor@*japanese_input_table_processor
     - lua_processor@numeric_phrase_processor  # 纯数字常用语编码；不影响普通候选数字选词
     - lua_processor@space_commit_raw_processor  # 可切换“原文+空格”或“选择首选”（必须放在最前面）
+    - lua_processor@*emoji_second_position_processor  # 同步 F4 与设置面板的表情位置开关
+    - lua_processor@*emoji_learning_processor  # 记录用户实际选择的 emoji 及输入码
+    - lua_processor@*chinese_abbreviation_learning_processor  # 完整拼音选词后同步学习首字母简拼
     - lua_processor@*japanese_fuzzy_learning_processor
     - lua_processor@*select_character
     - ascii_composer
@@ -89,6 +110,7 @@ engine:
     - express_editor
 
   segmentors:
+    - lua_segmentor@*japanese_input_table_segmentor
     - ascii_segmentor
     - matcher
     - abc_segmentor
@@ -96,13 +118,19 @@ engine:
     - punct_segmentor
     - fallback_segmentor
   translators:
+    - lua_translator@*japanese_input_table_translator
     # 常用语先于普通中日词库产生候选，避免 aa 等冲突编码被挤到后页。
     - punct_translator
     - table_translator@builtin_shortcuts
+    - lua_translator@emoji_learning_translator
+    - lua_translator@chinese_abbreviation_learning_translator
     - lua_translator@common_phrase_translator
+    # Generate bounded Japanese prefix candidates before the large Chinese
+    # stream can fill the menu.  The final filter still ranks exact matches
+    # ahead of these completion candidates.
+    - lua_translator@*japanese_prefix_translator  # 至少 3 字母的日文前缀联想
     - script_translator@chinese_exact_translator
     - script_translator@japanese_translator  # 日文精确匹配
-    - lua_translator@*japanese_prefix_translator  # 至少 3 字母的日文前缀联想
     # All fuzzy rules share one prism lookup.  The Lua filter below applies
     # the master/child switches.  Five independent 48-57 MB lookups here
     # made every keystroke and Backspace rebuild the candidate list slowly.
@@ -119,6 +147,7 @@ engine:
     - lua_translator@*number_translator
     - lua_translator@*calc_translator
   filters:
+    - lua_filter@*japanese_input_table_filter
     - lua_filter@*corrector
     - reverse_lookup_filter@radical_reverse_lookup
     - lua_filter@*autocap_filter
@@ -193,9 +222,11 @@ rare_single_char_filter:
 
 pin_cand_filter:
   - d	的
+  - l	了
   - de	的 地 得
   - m	吗 嘛
   - hm	后面
+  - zonggj	总感觉
 
 # 主翻译器：中文拼音
 translator:
@@ -234,6 +265,10 @@ chinese_exact_translator:
 
 japanese_translator:
   dictionary: japanese
+  # Mixed input must compile and load its own Japanese prism.  Reusing the
+  # plain `japanese` prism made q -> ー work only after the standalone
+  # Japanese schema had been activated once in the same server process.
+  prism: rime_ice_japanese_japanese_exact
   enable_sentence: false
   enable_user_dict: true
   # 跨语言固定顺序：中文精确 1.2 > 日语精确 1.1 > 日语模糊 1.0。
@@ -421,8 +456,7 @@ key_binder:
     # 翻页
     - {accept: bracketleft, send: Page_Up, when: has_menu}
     - {accept: bracketright, send: Page_Down, when: has_menu}
-    - {accept: minus, send: Page_Up, when: has_menu}
-    - {accept: equal, send: Page_Down, when: has_menu}
+    # 实体减号由服务端送入内部长音码 q，候选窗仍显示原始减号。
 
 # 编辑器
 editor:
@@ -439,12 +473,16 @@ editor:
 
 # 拼写设定
 speller:
-  alphabet: zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA`
+  alphabet: "zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA`-"
   initials: zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA
   delimiter: " '"
   algebra:
     ### 日文模糊规则禁止放在全局 algebra。
     ### 全局变换会同时污染中文拼音；日语规则仅由 Lua 日语链处理。
+
+    ### 日语长音精确输入：词库用 -，键盘用 q（例如 toukyoq → とうきょー）。
+    ### 这不是模糊匹配；中文拼音编码不含 -，因此不会污染中文候选。
+    - 'derive|-|q|'
     
     ### 超级简拼
     - erase/^hm$/

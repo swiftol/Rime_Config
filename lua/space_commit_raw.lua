@@ -14,13 +14,20 @@ local function processor(key, env)
     return 2  -- kNoop，不处理其他按键
   end
 
+  local hot_mode = context:get_property("space_hot_mode")
+  -- The settings panel publishes this property to existing sessions.  Only
+  -- fall back to the compiled schema before the user has saved a hot mode.
+  local reading_preview = hot_mode == "preview" or
+      ((not hot_mode or hot_mode == "") and env.engine.schema.config:get_bool("space_commit_raw/reading_preview"))
+  local select_first = hot_mode == "first" or
+      ((not hot_mode or hot_mode == "") and env.engine.schema.config:get_bool("space_commit_raw/select_first"))
   -- 读音预览模式下，按下和松开空格都不能改变正在输入的内容。
-  if env.engine.schema.config:get_bool("space_commit_raw/reading_preview") then
+  if reading_preview then
     return 1  -- kAccepted
   end
 
   -- 开启“空格选择首选”后不截获空格，让 selector / editor 正常处理。
-  if env.engine.schema.config:get_bool("space_commit_raw/select_first") then
+  if select_first then
     return 2  -- kNoop
   end
   

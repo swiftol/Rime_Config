@@ -153,6 +153,69 @@ internal static class Program
         }
     }
 
+    private static bool IsProcessRunningFrom(string processName, string executable)
+    {
+        foreach (Process process in Process.GetProcessesByName(processName))
+        {
+            try
+            {
+                if (String.Equals(process.MainModule.FileName, executable,
+                                  StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            catch { }
+        }
+        return false;
+    }
+
+    private static string Quote(string value)
+    {
+        return "\"" + value + "\"";
+    }
+
+    // Keep Mozc outside host applications: it is a separate local process,
+    // and the V2 schema falls back to the Japanese dictionary if it is absent.
+    private static void StartMozcBridge(string installRoot, string rimeDir, string stateDir)
+    {
+        string mozcRoot = Path.Combine(installRoot, "mozc");
+        string bridge = Path.Combine(mozcRoot, "MozcBridge.exe");
+        string converter = Path.Combine(mozcRoot, "converter", "converter_main.exe");
+        string romanTable = Path.Combine(mozcRoot, "romanji-hiragana.tsv");
+        if (!File.Exists(bridge) || !File.Exists(converter) || !File.Exists(romanTable))
+        {
+            Log("Mozc V2 运行组件未安装；日语 V2 将使用词库回退。");
+            return;
+        }
+        if (IsProcessRunningFrom("MozcBridge", bridge))
+        {
+            Log("Mozc V2 桥接器已运行。");
+            return;
+        }
+
+        string profile = Path.Combine(stateDir, "mozc-v2-profile");
+        string mailbox = Path.Combine(rimeDir, "mozc_v2_mailbox");
+        Directory.CreateDirectory(profile);
+        Directory.CreateDirectory(mailbox);
+        string arguments = String.Join(" ", new[]
+        {
+            Quote(converter), Quote(mozcRoot), Quote(profile), Quote(romanTable), Quote(mailbox)
+        });
+        try
+        {
+            Process.Start(new ProcessStartInfo(bridge, arguments)
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden
+            });
+            Log("Mozc V2 桥接器已启动。");
+        }
+        catch (Exception ex)
+        {
+            Log("Mozc V2 桥接器启动失败，将回退词库：" + ex.Message);
+        }
+    }
+
     public static int Main(string[] args)
     {
         Console.OutputEncoding = new UTF8Encoding(false);
@@ -226,6 +289,7 @@ internal static class Program
             Log("真实候选自测通过：nihao 已产生候选。");
             File.WriteAllText(Path.Combine(stateDir, "configured-1.1.0.txt"), DateTime.Now.ToString("o"), new UTF8Encoding(false));
             if (File.Exists(server)) Process.Start(new ProcessStartInfo(server) { UseShellExecute = true });
+            StartMozcBridge(installRoot, rimeDir, stateDir);
             Log("V1.1.0 部署完成，无需重启电脑。");
             if (!quiet) { Console.WriteLine("安装完成，按 Enter 关闭窗口。"); Console.ReadLine(); }
             return 0;

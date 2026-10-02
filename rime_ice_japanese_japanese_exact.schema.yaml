@@ -1,0 +1,21 @@
+# Dedicated exact-Japanese prism for the mixed Chinese/Japanese schema.
+#
+# Keeping this separate from japanese.prism.bin prevents cold-start behavior
+# from depending on whether the standalone Japanese schema was activated first.
+schema:
+  schema_id: rime_ice_japanese_japanese_exact
+  name: 中日混输·日语精确棱镜
+  version: "1.0"
+
+speller:
+  alphabet: "zyxwvutsrqponmlkjihgfedcba-_"
+  delimiter: " '"
+  algebra:
+    - 'derive/_/x/'
+    - 'derive/-/q/'
+
+translator:
+  dictionary: japanese
+  prism: rime_ice_japanese_japanese_exact
+  enable_sentence: false
+  enable_user_dict: true

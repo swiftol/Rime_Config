@@ -9,7 +9,36 @@ patch:
   # 未自行指定 page_size 的第三方方案会自动继承此值。
   "menu/page_size": 100
   schema_list:
-    - {schema: rime_ice_japanese}
+    - {schema: rime_ice_japanese_mozc}
+    - {schema: japanese_mozc_v2}
   switcher:
-    caption: "〔方案選單〕"
+    caption: "〔中日输入法〕"
     hotkeys: ["Control+grave", F4]
+    save_options:
+      - full_shape
+      - ascii_punct
+      - traditionalization
+      - emoji
+      - show_english_annotation
+      - show_japanese_annotation
+      - show_direct_japanese_reading
+      - show_single_character_annotation
+      - japanese_continuation_lock
+      - japanese_prefix_completion_disabled
+      - japanese_prefix_completion_suffix
+      - japanese_prefix_completion_japanese_first
+      - japanese_fuzzy_match
+      - japanese_fuzzy_sokuon
+      - japanese_fuzzy_long_i
+      - japanese_fuzzy_long_u
+      - japanese_fuzzy_long_mark
+      - japanese_fuzzy_chi_ji
+      - japanese_fuzzy_hu_fu
+      - japanese_fuzzy_shu_sho
+      - japanese_fuzzy_ke_kai
+      - japanese_fuzzy_ke_kae_gae
+      - japanese_fuzzy_sei_sai
+      - japanese_fuzzy_dakuten
+      - japanese_particle_wa_ha
+      - sentence_translation
+      - google_cloud_candidates

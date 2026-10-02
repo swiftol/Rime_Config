@@ -12,6 +12,7 @@ config_version: "24.03.24"
 ## 九宫格依赖于 rime_mint ，如果需要使用其他方案（比如: 小鹤双拼的 九宫格），可以使用 custom 文件覆写
 schema_list:
   - schema: rime_ice_japanese    # 雾凇拼音·中日 V9
+  - schema: rime_ice_japanese_mozc # 雾凇中日 Mozc 混输版
   # - schema: double_pinyin_ziguang # 紫光双拼
   # - schema: double_pinyin         # 自然码双拼
 
@@ -22,13 +23,15 @@ switcher:
   hotkeys:
     - Control+grave
     - Control+Shift+grave
-    # F4 和 JetBrains 的快捷键冲突
-    # - F4
+    - F4
   # 在切换方案时保留的选项
   save_options:
     - show_english_annotation
     - show_japanese_annotation
     - show_single_character_annotation
+    - japanese_prefix_completion_disabled
+    - japanese_prefix_completion_suffix
+    - japanese_prefix_completion_japanese_first
     - full_shape  # 保留全角模式
     - ascii_punct # 保留西文模式
     - transcription     # 保留汉字简繁体选项
@@ -141,11 +144,8 @@ key_binder:
     - { when: composing, accept: ISO_Left_Tab, send: Shift+Left } # ISO_Left_Tab 是 Shift+Tab
     - { when: composing, accept: Shift+Tab, send: Shift+Left }
     - { when: composing, accept: Tab, send: Shift+Right }
-    # 翻页
-    - { when: paging, accept: minus, send: Page_Up }             # 使用`-`进行向上翻页（第一页时候无效）
-    - { when: has_menu, accept: equal, send: Page_Down }         # 使用`=`进行向下翻页
-    - { when: paging, accept: comma, send: Page_Up }             # 候选窗口翻页
-    - { when: has_menu, accept: period, send: Page_Down }
+    # 翻页只使用 PageUp/PageDown、方括号或现有组合键。
+    # `-` 与 `=` 保留给实际输入；日语中的 `-` 用于输入长音符 `ー`。
     - { when: predicting, accept: comma, send: comma }           # 在预编码模式下,不当作快捷键
     - { when: predicting, accept: period, send: period }
     # 切换状态

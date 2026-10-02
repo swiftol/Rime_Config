@@ -58,7 +58,10 @@ internal sealed class CustomFuzzyRuleStore
             .ToList();
         var lines = new List<string> { "# enabled\tleft\tright (bidirectional)" };
         lines.AddRange(rules.Select(x => $"{(x.Enabled ? 1 : 0)}\t{x.Left}\t{x.Right}"));
-        File.WriteAllLines(FilePath(language), lines, new UTF8Encoding(false));
+        var path = FilePath(language);
+        var text = string.Join("\n", lines) + "\n";
+        if (!File.Exists(path) || File.ReadAllText(path, Encoding.UTF8) != text)
+            File.WriteAllText(path, text, new UTF8Encoding(false));
         if (language == FuzzyLanguage.Chinese) UpdateChineseSchema(rules);
     }
 
@@ -93,6 +96,8 @@ internal sealed class CustomFuzzyRuleStore
             if (index < 0) throw new InvalidDataException("方案文件缺少 menu: 插入点。");
             text = text.Insert(index, "\n" + generated + "\n");
         }
+        var original = File.ReadAllText(_schema, Encoding.UTF8);
+        if (original == text) return;
         File.Copy(_schema, _schema + ".before_custom_fuzzy", true);
         File.WriteAllText(_schema, text, new UTF8Encoding(false));
     }

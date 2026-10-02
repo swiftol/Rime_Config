@@ -1,6 +1,9 @@
 #define MyAppName "雾凇拼音·中日混输输入法"
 #define MyAppVersion "1.1.0"
 #define MyAppPublisher "swiftol"
+#ifndef MyOutputBaseFilename
+#define MyOutputBaseFilename "Rime-Chinese-Japanese-1.1.0-Setup"
+#endif
 
 [Setup]
 AppId={{AE395F84-DC9B-4DBF-95A9-0B4B178829C8}
@@ -11,7 +14,7 @@ DefaultDirName={autopf}\RimeChineseJapanese
 DefaultGroupName={#MyAppName}
 UninstallDisplayName={#MyAppName}
 OutputDir=output
-OutputBaseFilename=Rime-Chinese-Japanese-1.1.0-Setup
+OutputBaseFilename={#MyOutputBaseFilename}
 Compression=lzma2/fast
 SolidCompression=yes
 LZMAUseSeparateProcess=yes
@@ -32,10 +35,16 @@ Name: "chinesesimplified"; MessagesFile: "ChineseSimplified.isl"
 [Files]
 Source: "payload\runtime\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "payload\config\*"; DestDir: "{app}\config"; Excludes: ".git\*,build\*,sync\*,clipboard\*,*.userdb\*,*.userdb.txt,*.userdb.kct,user.yaml,installation.yaml,custom_phrase.txt,custom_japanese_fuzzy.tsv,custom_chinese_fuzzy.tsv,common_phrase_data.lua,*.log,*.bak,*.backup"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "payload\mozc\*"; DestDir: "{app}\mozc"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "payload\settings\RimeSettings.exe"; DestDir: "{app}\tools"; DestName: "RimeSettings.exe"; Flags: ignoreversion
+; The customized tray menu launches the localized filename.  Keep the ASCII
+; name for existing shortcuts and install an identical localized copy for the
+; tray command.
+Source: "payload\settings\RimeSettings.exe"; DestDir: "{app}\tools"; DestName: "中日方案设置.exe"; Flags: ignoreversion
 Source: "README.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "RimeUserBootstrap.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "RimeCandidateSelfTest.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "MozcV2Launcher.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "cleanup-old-runtime.ps1"; DestDir: "{app}"; Flags: ignoreversion
 
 [InstallDelete]
@@ -45,6 +54,7 @@ Type: filesandordirs; Name: "{app}\*"
 Name: "{commonprograms}\{#MyAppName}\中日方案设置"; Filename: "{app}\tools\RimeSettings.exe"
 Name: "{commonprograms}\{#MyAppName}\用户配置目录"; Filename: "{sys}\explorer.exe"; Parameters: "shell:AppData\Rime"
 Name: "{commondesktop}\中日方案设置"; Filename: "{app}\tools\RimeSettings.exe"; Tasks: desktopicon
+Name: "{commonstartup}\雾凇中日日语 V2 服务"; Filename: "{app}\MozcV2Launcher.exe"; WorkingDir: "{app}"
 
 [Tasks]
 Name: "desktopicon"; Description: "创建中日方案设置桌面快捷方式"; GroupDescription: "快捷方式："; Flags: checkedonce
