@@ -1,8 +1,8 @@
-# Rime Chinese–Japanese Direct Input 1.1
+# Rime Chinese–Japanese Direct Input
 
 [简体中文](./README.md) | **English**
 
-Rime Chinese–Japanese Direct Input is a Windows IME distribution built on Weasel and Rime Ice. It accepts Chinese Pinyin and Japanese romaji in one schema, without a Japanese-only prefix or a manual mode switch.
+Rime Chinese–Japanese Direct Input is a Windows IME distribution built on Weasel, Rime Ice, and Rime. It accepts Chinese Pinyin and Japanese romaji in one schema, and also includes a separate Mozc-based Japanese schema.
 
 ![Privacy-safe synthetic demo of Chinese and Japanese candidates](./docs/media/mixed-input-demo.gif)
 
@@ -10,25 +10,23 @@ Rime Chinese–Japanese Direct Input is a Windows IME distribution built on Weas
 
 ## Highlights
 
-- **One mixed schema** — type Chinese Pinyin and Japanese romaji directly.
-- **Trilingual candidate information** — Chinese candidates may show concise English definitions, natural Japanese translations, and Japanese readings.
-- **Practical Japanese input** — long vowels, sokuon, voiced sounds, spelling variants, and configurable fuzzy rules.
-- **Custom candidate UI** — compact single-row mode, scrollable expanded mode, dynamic widths, annotation alignment, and separate Chinese/Japanese colors.
-- **GUI settings** — configure annotations, key behavior, fuzzy matching, appearance, common phrases, and rare-character filtering.
-- **Windows installer** — install or upgrade while preserving personal data; Windows itself does not need to restart.
-- **Local-first privacy** — input processing stays on the device. No account or cloud service is required.
+- **Mixed Chinese and Japanese input** — type Pinyin and Japanese romaji without switching modes; an independent Mozc scheme is also available.
+- **Japanese composition** — AZIK extensions, kana input table, long-vowel and sokuon handling, fuzzy matching, and contextual candidate continuation.
+- **Optional cloud candidates** — Google suggestions can be configured for Chinese, Japanese, or both languages; local candidates appear independently.
+- **Candidate annotations** — English/Japanese translations and Japanese readings, with controls for annotation source and display.
+- **Japanese reserved words** — organize, add, edit, remove, and enable groups of composable entries.
+- **Desktop experience** — scrollable candidate window, row-based paging, GUI settings, dictionary management, and personal-data migration.
+- **Local-first, network optional** — ordinary local input works offline; enabling cloud suggestions or explicitly requesting online translation sends relevant text to the selected service.
 
 ## Download
 
-Download the latest Windows installer from [GitHub Releases](https://github.com/swiftol/Rime_Config/releases/latest).
+Download the latest Windows installer from [GitHub Releases](https://github.com/swiftol/Rime_Config/releases/latest). Source changes are published on [`master`](https://github.com/swiftol/Rime_Config/tree/master); check each Release for the source commit corresponding to its installer.
 
 The installer includes the runtime, public dictionaries, translation annotations, and the settings application. After an upgrade, close and reopen already-running applications so that they load the new IME component.
 
 ## Privacy
 
-The IME does not upload typed text, candidate selections, personal phrases, clipboard history, synchronization data, logs, or device identifiers. Release packages contain only the public runtime, configuration, and dictionaries required by the product.
-
-See [Privacy](./docs/PRIVACY.md) for the public data boundary.
+Local candidate generation and personal learning stay on device. Cloud suggestions are off by default; when enabled, the current spelling is sent to Google Input Tools. Online sentence translation is user-initiated and uses credentials configured by the user for NiuTrans. See [Privacy](./docs/PRIVACY.md) for details.
 
 ## Repository map
 
@@ -53,4 +51,6 @@ Issues and reproducible input examples are welcome. Please read [CONTRIBUTING.md
 
 ## Credits and license
 
-This project builds on [Rime Ice](https://github.com/iDvel/rime-ice), [rime-japanese](https://github.com/gkovacs/rime-japanese), [Rime](https://rime.im/), and [Weasel](https://github.com/rime/weasel). Upstream components retain their original licenses; project modifications follow the license declared in this repository.
+This project builds on [Rime](https://github.com/rime), [Weasel](https://github.com/rime/weasel), [Rime Ice](https://github.com/iDvel/rime-ice), and the [rime-japanese ecosystem](https://github.com/gkovacs/rime-japanese). We also studied [Metasequoia (Mizuki) IME](https://github.com/metasequoiaime/msime-windows), especially its Japanese segmentation, contextual continuation, and candidate-selection behavior. This is an algorithm/UI design reference; the implementation here is our own Rime/Lua code, not a port of Mizuki source.
+
+The optional cloud-candidate feature uses Google Input Tools as an external service; user-initiated online sentence translation uses the NiuTrans API. Neither service is an open-source code dependency. Mozc runtime/data notices are included under [`mozc-runtime/licenses`](./mozc-runtime/licenses). Third-party components and data retain their respective licenses; original project code is licensed under [GPL-3.0](./LICENSE).
