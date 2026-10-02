@@ -92,9 +92,9 @@
 | [Rime](https://github.com/rime)、[小狼毫 Weasel](https://github.com/rime/weasel) | 输入法引擎与 Windows 前端基础 | 上游组件；改动版本见 [swiftol/librime](https://github.com/swiftol/librime) 与 [swiftol/weasel](https://github.com/swiftol/weasel) |
 | [雾凇拼音](https://github.com/iDvel/rime-ice) | 中文方案、词库与配置基础 | 直接基于并持续修改；保留上游版权与许可证要求 |
 | [rime-japanese](https://github.com/gkovacs/rime-japanese) | 日语方案与词典生态参考 | 上游参考，依各文件标注保留许可 |
-| [水杉输入法（Metasequoia）](https://github.com/metasequoiaime/msime-windows) | 日语输入的分段、上下文续接、候选组织与选择行为研究 | 算法/交互思路参考；本仓库的 Rime/Lua 实现为本项目代码，不是水杉源码移植 |
+| [水杉输入法（Metasequoia）](https://github.com/metasequoiaime/msime-windows) | 日语句子解码/分段、候选搜索与上下文续接设计 | 开源项目（GPL-3.0）。本项目的日语候选实现参考并改编其公开实现；Rime/Lua 侧主要对应 `lua/mozc_v2_translator.lua`、`lua/mozc_candidate_order_filter.lua`、`lua/mozc_v2_prefix_translator.lua`。水杉的 C++ 文件没有原样放入本仓库；改编部分按 GPL-3.0 发布 |
 | [Mozc](https://github.com/google/mozc) | 独立日语方案的转换引擎与公开词典数据 | 随包携带所需运行文件；版权和再分发文本在 [`mozc-runtime/licenses`](./mozc-runtime/licenses) |
 | [Google Input Tools](https://www.google.com/inputtools/) | 可选的中文/日语云候选来源 | 在线服务，不是本仓库代码；启用后会发送当前拼写以获取建议 |
 | [小牛翻译 API](https://niutrans.com/) | 设置面板中用户主动触发的在线句子翻译 | 外部在线服务；用户自行配置凭据，翻译文本会发送至该服务 |
 
-本项目的云候选队列、双语判定、候选去重/排序、缓存与个人学习逻辑由本项目实现；没有把“水杉”或 Google 的闭源输入法源码复制进来。各第三方组件和数据分别遵循其上游许可证；本项目自有部分按仓库 [GPL-3.0](./LICENSE) 发布。完整数据边界见[隐私说明](./docs/PRIVACY.md)。
+水杉是本项目日语输入实现的重要开源参考来源，相关改编代码在上表列出，并遵循其 GPL-3.0 许可。云候选队列、双语判定、云候选去重/排序、缓存与个人学习逻辑由本项目实现；Google Input Tools 与小牛翻译是外部在线服务，不是随本项目分发的闭源输入法代码。其他第三方组件和数据分别遵循其上游许可证；本项目自有部分按仓库 [GPL-3.0](./LICENSE) 发布。完整数据边界见[隐私说明](./docs/PRIVACY.md)。
