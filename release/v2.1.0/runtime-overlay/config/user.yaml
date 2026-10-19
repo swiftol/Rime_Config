@@ -1,0 +1,32 @@
+var:
+  option:
+    google_cloud_candidates: true
+    hide_japanese_translation_annotations: false
+    japanese_continuation_lock: true
+    japanese_fuzzy_chi_ji: true
+    japanese_fuzzy_dakuten: true
+    japanese_fuzzy_hu_fu: true
+    japanese_fuzzy_ke_kae_gae: true
+    japanese_fuzzy_ke_kai: true
+    japanese_fuzzy_long_i: true
+    japanese_fuzzy_long_mark: true
+    japanese_fuzzy_long_u: true
+    japanese_fuzzy_match: true
+    japanese_fuzzy_multiple: true
+    japanese_fuzzy_sei_sai: true
+    japanese_fuzzy_shu_sho: true
+    japanese_fuzzy_sokuon: true
+    japanese_learning_kanji: true
+    japanese_learning_mode: true
+    japanese_learning_newline: true
+    japanese_learning_space: true
+    japanese_particle_wa_ha: false
+    japanese_prefix_completion_disabled: true
+    japanese_prefix_completion_japanese_first: false
+    japanese_prefix_completion_suffix: true
+    sentence_translation: true
+    show_direct_japanese_reading: false
+    show_english_annotation: true
+    show_japanese_annotation: true
+    show_single_character_annotation: false
+  previously_selected_schema: rime_ice_japanese_mozc
