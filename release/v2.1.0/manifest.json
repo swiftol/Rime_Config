@@ -128,12 +128,6 @@
       "SHA256": "FCB900E311D32CED05499C86E236D1084FB0C0937398DEB6311FC6C7287A7821"
     },
     {
-      "BaseSHA256": null,
-      "Length": 87,
-      "Path": "tools/Settings-WinUI/wheel-diagnostics.marker",
-      "SHA256": "BB858BC4BDC47D859EC084F3FF278242C8E2A4AEF85E73CB3BF8BC1199217918"
-    },
-    {
       "BaseSHA256": "1E406797858FA88CE095C4AAD2CE0B7626BD2FF5B07642B339E05271A2D72F2C",
       "Length": 724992,
       "Path": "tools/Settings-WinUI/ZhongriSettingsV2.dll",

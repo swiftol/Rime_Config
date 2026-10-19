@@ -59,7 +59,7 @@ foreach($view in 'Registry32','Registry64'){
 foreach($part in 'config','mozc','tools/Settings-WinUI'){
  $root=Join-Path $install $part
  foreach($file in Get-ChildItem $root -File -Recurse){
-  if($file.Name -match '\.(pdb|log|bak|backup|tmp|lock)$' -or $file.FullName -match '[\\/](userdb|mailbox|MozcProfile|backups|clipboard|sync)[\\/]' -or $file.Name -match 'learning|frequency|observations|^user\.yaml$|^installation\.yaml$|common_phrase_data'){continue}
+  if($file.Name -match '\.(pdb|log|marker|bak|backup|tmp|lock)$' -or $file.FullName -match '[\\/](userdb|mailbox|MozcProfile|backups|clipboard|sync)[\\/]' -or $file.Name -match 'learning|frequency|observations|^user\.yaml$|^installation\.yaml$|common_phrase_data'){continue}
   Add-Payload $file.FullName ($part+'/'+$file.FullName.Substring($root.Length+1))
  }
 }
