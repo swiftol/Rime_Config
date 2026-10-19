@@ -1,5 +1,7 @@
 param([Parameter(Mandatory)][string]$Manifest,[switch]$NoPublish,[string]$WorkDirectory=$env:RUNNER_TEMP,[string]$OutputDirectory='')
 $ErrorActionPreference='Stop'
+[Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
+$OutputEncoding = [Console]::OutputEncoding
 $repo=Split-Path $PSScriptRoot -Parent
 $ready=Get-Content -LiteralPath $Manifest -Raw|ConvertFrom-Json
 if($ready.Version -notmatch '^\d+\.\d+\.\d+$'){throw 'Invalid release version'}
