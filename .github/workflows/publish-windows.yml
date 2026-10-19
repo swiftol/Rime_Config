@@ -1,0 +1,30 @@
+name: Publish Windows release
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths: ['release/ready-v2.1.0.json']
+permissions:
+  contents: write
+concurrency:
+  group: publish-windows-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    steps:
+      - name: Checkout approved release inputs
+        uses: actions/checkout@v4
+      - name: Validate release entry
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($file in 'release/ready-v2.1.0.json', 'release/Publish-Release.ps1') {
+            if (!(Test-Path -LiteralPath $file -PathType Leaf)) { throw "Release preparation incomplete: $file" }
+          }
+      - name: Build, verify, and publish
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./release/Publish-Release.ps1 -Manifest release/ready-v2.1.0.json
