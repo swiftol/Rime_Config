@@ -19,6 +19,24 @@ schema:
 switches: []
 
 engine:
+  processors:
+    - lua_processor@*panel_option_defaults
+    - lua_processor@*japanese_input_table_processor
+    - lua_processor@numeric_phrase_processor
+    - lua_processor@space_commit_raw_processor
+    - lua_processor@*emoji_second_position_processor
+    - lua_processor@*emoji_learning_processor
+    - lua_processor@*chinese_abbreviation_learning_processor
+    - lua_processor@*japanese_fuzzy_learning_processor
+    - lua_processor@*select_character
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
   translators:
     - lua_translator@*japanese_input_table_translator
     - punct_translator

@@ -1,0 +1,393 @@
+{
+  "Version": "2.1.0",
+  "Changes": [
+    {
+      "BaseSHA256": "345045FA4C27FB8767E3D35FBF94BB1032D532B5C3A8CCB3282E53A466549015",
+      "Length": 2946560,
+      "Path": "ZhongriServer.exe",
+      "SHA256": "C5651806A87ED039FAF711D6CBCC7DD098F51CCF2BE5842FE6F4AEB4A97FEE0C"
+    },
+    {
+      "BaseSHA256": "C1008C06A765982BEE862C358700C2FC9FA357C20DFB1B753DD32B6FAFD8D11A",
+      "Length": 1120256,
+      "Path": "zhongri.dll",
+      "SHA256": "46AC5306B84E22BE7C97B271A47AFB0EF0A173B298FF97C52C1C42F56F5223C5"
+    },
+    {
+      "BaseSHA256": "20B1AED92E5A77DE3E2A28A8965970319276B3D361B45D3031B50F45ED83E434",
+      "Length": 1249792,
+      "Path": "zhongrix64.dll",
+      "SHA256": "67908EA059F276B1AD43A7FF480B4FD36BF38AA6BDF112CED22A6D0BAD270D92"
+    },
+    {
+      "BaseSHA256": "BE0122EC42E9BDEB9AA2D92D81B7CA6F5DE63B85692E8F1CD5FC9810DC434D8B",
+      "Length": 6116,
+      "Path": "config/lua/cloud_language_classifier.lua",
+      "SHA256": "575A751B56771AAFF2024E638136C124343B1D0921EFB3AB2F2FC5071ECA0F94"
+    },
+    {
+      "BaseSHA256": "7F50A987F5537FCB6DC23ADBE1E6669FC2C19C0070D40C71F5ECD95B85E0C704",
+      "Length": 855,
+      "Path": "config/lua/direct_japanese_reading_filter.lua",
+      "SHA256": "ABF879733BD20F98321811E3DDB432933D831BBDDC09899D1AB68331C4B369DF"
+    },
+    {
+      "BaseSHA256": "74A5211F67393ED10288555250358D3236C70F000689DAC0126B1B5006ED77A3",
+      "Length": 11524,
+      "Path": "config/lua/google_cloud_candidate_filter.lua",
+      "SHA256": "921DEE5750BB33765C1A264DBF05859F8AF63E8C758A4B5BBE72BFBCE04436BB"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 630,
+      "Path": "config/lua/japanese_candidate_diagnostic.lua",
+      "SHA256": "C27F801532AC33E78A6C832D8DF521B72DCC84D59537B8CA1A8AEB2EB1DA8474"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 7315,
+      "Path": "config/lua/japanese_candidate_grammar.lua",
+      "SHA256": "830177291A24EA3C52293D0C6AD4715A97052048EB9458E71EBE3407095B9DB4"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 1918,
+      "Path": "config/lua/japanese_exact_priority.lua",
+      "SHA256": "910E7CDABFFCC3368E3B862E9698B9ED445E4F944962279D818B4F50B9C618B8"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 6192,
+      "Path": "config/lua/japanese_fuzzy_composition.lua",
+      "SHA256": "C55676F0BDE1D65D688961927CD343DCA4E6D790D039E7F939C3383C402772E5"
+    },
+    {
+      "BaseSHA256": "9D269EDD9CB28BB62A49E35492739DB4A0AC559A712E67632D796EF7E9FCB106",
+      "Length": 49778,
+      "Path": "config/lua/japanese_fuzzy_filter.lua",
+      "SHA256": "F83CD312C66FAE0C5CC62314439399DB9726FCEC1FDA71A4C192E2121AE48116"
+    },
+    {
+      "BaseSHA256": "596FDFFCFCE0052EDFB6223FEBD90DB562B060C644A9E8F2DAA7827AD9875783",
+      "Length": 26982,
+      "Path": "config/lua/japanese_fuzzy_translator.lua",
+      "SHA256": "504A610082F2D6F231065CDF6F7297B15AC94C00A20F9B042C30B054768AA96A"
+    },
+    {
+      "BaseSHA256": "3C7FECAC129FFCEB44D28FFB70BB1BC97D5AC4A65B9C56C870FE65EDBEFA81A4",
+      "Length": 55943,
+      "Path": "config/lua/japanese_input_table.lua",
+      "SHA256": "D85FDAA31CFF4A9F184FBDA63CDBBC6DC3D35AFB6853245303692E93134399ED"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 7765,
+      "Path": "config/lua/japanese_segment_edit.lua",
+      "SHA256": "1E29AE8B5D17AB4341696FECF97C5FC79616383E9AA841262EAC8889A328DED6"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 5257,
+      "Path": "config/lua/japanese_semantic_order.lua",
+      "SHA256": "E61DF7E4C548337C07083E3B75AFEB3A62976E1BB13844ACDDDA6BFE161825A6"
+    },
+    {
+      "BaseSHA256": "D974A97DE64D2C2DDECE199B6568B507B3CE56FD79896EAE4550CEBBD4A1FF89",
+      "Length": 42772,
+      "Path": "config/lua/mozc_candidate_order_filter.lua",
+      "SHA256": "F8F33EAC799210C4C492EA081F5F4360FB0691863A434723616093297914C2DB"
+    },
+    {
+      "BaseSHA256": "155A4ED986081642DBB47619D04AE76BAC0AACFD2BF5C183A2358F6F77994C6C",
+      "Length": 63287,
+      "Path": "config/lua/mozc_v2_translator.lua",
+      "SHA256": "DE77929761C56C102664310D5F247D8D0A2BA7E5CA442C6B384903A4ADB83242"
+    },
+    {
+      "BaseSHA256": "5DF18B8F425422B00AC8FC20C626A2AB5C6D39B2FF99C1CA855DA25D5E23954F",
+      "Length": 3185,
+      "Path": "config/lua/source_label_filter.lua",
+      "SHA256": "5E89121B902CA5060A3B9843885A025C539F40CD53713C5889F57012B13D7057"
+    },
+    {
+      "BaseSHA256": "56593F544215AEA2AE3D1AAFADF5BCADECB495FC336E808F1F3044EE8188754E",
+      "Length": 18575,
+      "Path": "config/lua/translation_annotation_filter.lua",
+      "SHA256": "6F78C8F994B0CDE360D59C549FEFE46B1879DD391594E6504A97C50C442363F2"
+    },
+    {
+      "BaseSHA256": "F84FAD43E3945A810609DD1B1F28993830507F0FCCD2FB57014E1C6C2F904873",
+      "Length": 443392,
+      "Path": "mozc/ZhongriMozcBridge.exe",
+      "SHA256": "F5073C750F7501927F317526979507C1B346A09BC0767882899EDF8EECE30056"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 2963,
+      "Path": "tools/Settings-WinUI/romaji-reference.tsv",
+      "SHA256": "FCB900E311D32CED05499C86E236D1084FB0C0937398DEB6311FC6C7287A7821"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 87,
+      "Path": "tools/Settings-WinUI/wheel-diagnostics.marker",
+      "SHA256": "BB858BC4BDC47D859EC084F3FF278242C8E2A4AEF85E73CB3BF8BC1199217918"
+    },
+    {
+      "BaseSHA256": "1E406797858FA88CE095C4AAD2CE0B7626BD2FF5B07642B339E05271A2D72F2C",
+      "Length": 724992,
+      "Path": "tools/Settings-WinUI/ZhongriSettingsV2.dll",
+      "SHA256": "9DE61875F3C06C2D0C58B2576E559B257C89F02C3FA9F7617A20F93A769B56AB"
+    },
+    {
+      "BaseSHA256": "47631C5C1221205B0FE8BEDFBF5325DD638303627C9D2EED3B8DDC2CB8507D8E",
+      "Length": 666670,
+      "Path": "tools/中日输入法测试台.exe",
+      "SHA256": "D3358AE0F5458D8EDD8418113D677562B8DB968E031EAB88F4AF3C2BE8C09B0F"
+    },
+    {
+      "BaseSHA256": "1D4F50777840DA09475FDD6CF83FA72BD1CFA31724ADF374655CB1967E20710A",
+      "Length": 2102,
+      "Path": "config/weasel.custom.yaml",
+      "SHA256": "E2F45C86A98F2647FB9CA643315AEC82505148AA18025C186391F6169BADBB17"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 1468,
+      "Path": "config/chinese_correction_rules.tsv",
+      "SHA256": "D2564B4F01B43631FDA2EED9ACE68BEED84058358213A3B5FFEC0AF7263808DE"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 37,
+      "Path": "config/custom_chinese_fuzzy.tsv",
+      "SHA256": "F3068F4D7CBAE327CADD643972A13DD3F2A9548C0FA3E67EF1D0A4F69BFDF02D"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 46,
+      "Path": "config/custom_japanese_fuzzy.tsv",
+      "SHA256": "7F513767970B824BD1FCD5EB33ED9974FD09D515EA7B28FF121AA82B0C1C5CF9"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 29131,
+      "Path": "config/japanese_input_table.tsv",
+      "SHA256": "6133B7278912E7369CD82A52123A4F75A81ED4A500F90B4070D4CFF99C86BA2B"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 83,
+      "Path": "config/japanese_input_table.json",
+      "SHA256": "F145167E7D058C8D5E630873EEA0B2035F8638D207325DA6965359FE87C66970"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 39,
+      "Path": "config/japanese_input_table.state",
+      "SHA256": "AC39F494DE7962C5799C8C28A19C54C269661F57BE8C42FDBD2C9AD96A82F723"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 10003,
+      "Path": "config/global-settings-profiles.json",
+      "SHA256": "56FA6F51C377AD3EBDC15C4CAB159B6174579CFB58AED16F8DFE497E641846C4"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 3,
+      "Path": "config/emoji_second_position.txt",
+      "SHA256": "F1B2F662800122BED0FF255693DF89C4487FBDCF453D3524A42D4EC20C3D9C04"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 2,
+      "Path": "config/japanese_fuzzy_multiple.flag",
+      "SHA256": "4355A46B19D348DC2F57C046F8EF63D4538EBB936000F3C9EE954A27460DD865"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 2,
+      "Path": "config/japanese_reserved_whole.flag",
+      "SHA256": "4355A46B19D348DC2F57C046F8EF63D4538EBB936000F3C9EE954A27460DD865"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 2,
+      "Path": "config/japanese_vowel_tail_overlap.flag",
+      "SHA256": "9A271F2A916B0B6EE6CECB2426F0B3206EF074578BE55D9BC94F6F3FE3AB86AA"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 72,
+      "Path": "config/japanese_input_tables/07029819e66245cea89f822bfe6d869e.json",
+      "SHA256": "ADE30DFB48938DC431A76AAFF473CBFE256CF2D03EDA55A3256E062113036E0A"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 5501,
+      "Path": "config/japanese_input_tables/07029819e66245cea89f822bfe6d869e.tsv",
+      "SHA256": "63A2764170440A5D7E4D451FC5466A41CB3B72D32282E3933DB4596D1A96C5AF"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 145,
+      "Path": "config/japanese_input_tables/2d2dfe49eae643f6a7341627aeea42df.json",
+      "SHA256": "9E1D8864B3B1EDA3FB5131B8F14C1DE3D93E629CA753860CF06950770FCD0185"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 3256,
+      "Path": "config/japanese_input_tables/2d2dfe49eae643f6a7341627aeea42df.tsv",
+      "SHA256": "5BF523DF0CF1934ED89D1602C36FF26ABEEC5E19DB0DA67A041E29EA786A0232"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 75,
+      "Path": "config/japanese_input_tables/2f6ac1198f664982801912d788c7a824.json",
+      "SHA256": "5D26F2B7CD7F6D5CD67CC444E2BC3E2D9A7A95B64AB20B9614F68B0A70BB147D"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 4374,
+      "Path": "config/japanese_input_tables/2f6ac1198f664982801912d788c7a824.tsv",
+      "SHA256": "A6239735DC6A3D7980B43EA9B212C17AD29984D8A0F82C5D5B91E67969F3CA9C"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 1484,
+      "Path": "config/japanese_input_tables/4bb8ca826d1244b7bd5e7e482f59981a.json",
+      "SHA256": "228D9B892E7AEFF703C38DDDCFD97069E910C274344212D52BE022882AA1A845"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 1338,
+      "Path": "config/japanese_input_tables/4bb8ca826d1244b7bd5e7e482f59981a.reserved.json",
+      "SHA256": "8C748558BB0F083382E61C17C8E9E906A8AB45253F8AB0386722132ECA854C6B"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 8472,
+      "Path": "config/japanese_input_tables/4bb8ca826d1244b7bd5e7e482f59981a.tsv",
+      "SHA256": "C3D8EA8F3209D88A592A2A84BC7BA431A8B67E754CE014ECBF84D689534870BD"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 76,
+      "Path": "config/japanese_input_tables/5d90e6238b08428ab5c42051a530874a.json",
+      "SHA256": "C9742BA8B7E298EC0A6B65EC86748FC1C87986239B8413CD3E63D9C85CC380E5"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 8736,
+      "Path": "config/japanese_input_tables/5d90e6238b08428ab5c42051a530874a.tsv",
+      "SHA256": "FE9CF536AC088CE49F0C8F97658EAFB84A7C09E57E8448E4416D46E90C60177C"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 7209,
+      "Path": "config/japanese_input_tables/7ef0684e15d840eba004a0aa23223e3a.json",
+      "SHA256": "D4DBE7D2AEB5A74315A39E4F3429B6A6A9B019CA5733994B1E2B0417B291E35D"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 4714,
+      "Path": "config/japanese_input_tables/7ef0684e15d840eba004a0aa23223e3a.reserved.json",
+      "SHA256": "6FD744B8A7A14776C0F8ECFCB1BCD849753B52EDDF8F739DAB6C61C78CD0F4C9"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 8472,
+      "Path": "config/japanese_input_tables/7ef0684e15d840eba004a0aa23223e3a.tsv",
+      "SHA256": "C3D8EA8F3209D88A592A2A84BC7BA431A8B67E754CE014ECBF84D689534870BD"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 80,
+      "Path": "config/japanese_input_tables/a7862110e01e46b9bc65ac1b6d63336b.json",
+      "SHA256": "C767487CC35C2473EDFEB28E40ABB0A4B6B5B28CE06D7C584F6F5C6663DE1EE9"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 6547,
+      "Path": "config/japanese_input_tables/a7862110e01e46b9bc65ac1b6d63336b.tsv",
+      "SHA256": "6A9608085CFDBA73EDA8C713E7769A9857934A614856B21C2E701C5BF6070EA5"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 74,
+      "Path": "config/japanese_input_tables/e57312b3e6ec48ec9f61eed311656b84.json",
+      "SHA256": "C46D2922A79D3EA3239698CD49C65274A3C0D869D8D651345ED9E74D52CDBF78"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 7459,
+      "Path": "config/japanese_input_tables/e57312b3e6ec48ec9f61eed311656b84.tsv",
+      "SHA256": "4F47477F492DED06EAB71D835F74BD3AA78DD8E4C54533B4137766C042672C41"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 72,
+      "Path": "config/japanese_input_tables/f6894499542597c6c3a7f69b576675e2.json",
+      "SHA256": "96FD0FF9FEF974B429A7E3232C6C477EF40410DD3E2A0FE23B17409851EC2972"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 8472,
+      "Path": "config/japanese_input_tables/f6894499542597c6c3a7f69b576675e2.tsv",
+      "SHA256": "C3D8EA8F3209D88A592A2A84BC7BA431A8B67E754CE014ECBF84D689534870BD"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 81,
+      "Path": "config/japanese_input_tables/f8e1aeeb32b547a080fcecbc59cb523c.json",
+      "SHA256": "0B0B2A66316163BE517CA08FBAF6E764EA27E10992DE9E50318107E244446C9F"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 13927,
+      "Path": "config/japanese_input_tables/f8e1aeeb32b547a080fcecbc59cb523c.tsv",
+      "SHA256": "33E0E4758750173526C1E4BC6FF7E03DBD5F436CA559E5AC56AEEFF7A0AA53BF"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 1145,
+      "Path": "config/user.yaml",
+      "SHA256": "1705FADF49A4F4B971EC0E91CB761CF4EFB96F53348AD3312F97212FEE876BC7"
+    },
+    {
+      "BaseSHA256": null,
+      "Length": 2737,
+      "Path": "default-hot-settings.json",
+      "SHA256": "63C2EC4D2D0BED9765C379440C7056B0645F3A87DB0D024304DC834B15691AEB"
+    },
+    {
+      "BaseSHA256": "30D541A1B232A2D4D29C944B3C313F8FA9055810E2086F56114F77BA72FE33EA",
+      "Length": 11264,
+      "Path": "ZhongriLauncher.exe",
+      "SHA256": "F98F3047781C70AA764FB5ED4061B97F896C7A8BBC04DCE4B4582CCD195F4AAA"
+    },
+    {
+      "BaseSHA256": "8D02B1099B22ABC5262C7881C1C90B2F6E40BAFE403C7CE66582668307BA2D83",
+      "Length": 300032,
+      "Path": "RimeCandidateSelfTest.exe",
+      "SHA256": "7B297FCB9773D44045A72978BA7728B094022383F5E32A8C28E8017693AAA0E0"
+    },
+    {
+      "BaseSHA256": "0FEAB5C27AF45F5C6C0FBB89E838A69706F635DA32CCCBFAEE3D02D1C36800AE",
+      "Length": 16,
+      "Path": "package-version.txt",
+      "SHA256": "34DE4A25D5E2DB1F38722E8BEF6B667F9CD19BB98B070F43299B034D043AFE95"
+    }
+  ],
+  "BaseUrl": "https://github.com/swiftol/Rime_Config/releases/download/v2.0.5/ZhongriInputMethod-2.0.5-Setup.exe",
+  "Unpacker": {
+    "Url": "https://raw.githubusercontent.com/jrathlev/InnoUnpacker-Windows-GUI/032d64c782efc6b36766d8f9c3b1b2f042144a58/innounp-2/bin/innounp-2.zip",
+    "SHA256": "10FCE27B6344B7674D5625CC34AFCA1C88C12183D957C6D93E401097FA2556CD",
+    "ExtractedRootRelative": "{app}",
+    "Exe": "innounp.exe"
+  },
+  "ValidationRun": "20261019-163930872-prepare-github-release-81029fb6beeb",
+  "BaseSHA256": "48D13CE8DA7DCAA6677106992E12316AA51B4927A9F7BD94A07C2818D370BA81",
+  "SettingCount": 76
+}

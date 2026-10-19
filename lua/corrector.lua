@@ -12,6 +12,7 @@
 --]]
 
 local M = {}
+local hot_correction = require("chinese_hot_correction")
 
 function M.init(env)
     local config = env.engine.schema.config
@@ -262,6 +263,7 @@ end
 
 function M.func(input, env)
     for cand in input:iter() do
+      if hot_correction.allow_candidate(cand,env) then
         -- cand.comment 是目前输入的词汇的完整拼音
         local pinyin = cand.comment:match("^［(.-)］$")
         if pinyin and #pinyin > 0 then
@@ -281,6 +283,7 @@ function M.func(input, env)
             end
         end
         yield(cand)
+      end
     end
 end
 

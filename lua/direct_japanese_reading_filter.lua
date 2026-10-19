@@ -4,7 +4,7 @@
 local JR_PATTERN = "%[%[RIME_JR:.-%]%]"
 
 local function direct_japanese_reading_filter(input, env)
-  local show = env.engine.context:get_option("show_direct_japanese_reading")
+  local show = env.engine.context:get_option("show_direct_japanese_reading") or env.engine.context:get_option("japanese_learning_mode")
   for cand in input:iter() do
     if not show then
       local comment = cand.comment or ""

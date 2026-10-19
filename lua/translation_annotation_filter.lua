@@ -428,4 +428,22 @@ local function translation_annotation_filter(input, env)
   end
 end
 
-return translation_annotation_filter
+local function init(env)
+  -- The native translation overlay can replace the Japanese surface after
+  -- this filter ran. Resolve that exact surface without re-running input or
+  -- changing candidate selection. Property notifications are synchronous.
+  env.annotation_reading_connection = env.engine.context.property_update_notifier:connect(
+    function(context, name)
+      if name ~= "annotation_reading_surface" then return end
+      local surface = context:get_property(name) or ""
+      local reading = ""
+      if surface ~= "" and #surface <= 768 then
+        reading = reviewed_reading_for(surface) or japanese_reading(surface) or ""
+      end
+      context:set_property("annotation_reading_result", reading)
+    end)
+end
+
+return {init = init, func = translation_annotation_filter, fini = function(env)
+  if env.annotation_reading_connection then env.annotation_reading_connection:disconnect() end
+end}

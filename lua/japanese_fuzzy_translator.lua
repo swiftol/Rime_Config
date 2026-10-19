@@ -59,8 +59,50 @@ local function remember_completed(env, input, text)
 end
 
 function M.func(input, segment, env)
-  if segment:has_tag("japanese_input_table") then return end
   local context = env.engine.context
+  local multi=require('japanese_fuzzy_composition')
+  local multi_stamp=tostring(multi.enabled(context))..':'..(context:get_property('japanese_fuzzy_rules_generation') or '')
+  if env.multi_stamp~=multi_stamp then
+    env.multi_stamp=multi_stamp;env.completed_cache={};env.completed_order={}
+  end
+  local table_input, table_segment, table_kana
+  local table_exact={}
+  local chinese_exact={}
+  if segment:has_tag("japanese_input_table") then
+    local spelling, kana = require("japanese_input_table").fuzzy_spelling(input, context)
+    if not spelling then return end
+    table_input, table_segment, table_kana = input, segment, kana
+    for _,text in ipairs(require('mozc_v2_translator').query_kana(kana) or {}) do table_exact[text]=true end
+    if (env.engine.schema.schema_id or ''):match('^rime_ice_japanese') then
+      env.chinese_exact_translator=env.chinese_exact_translator or Component.Translator(env.engine,'','script_translator@translator')
+      chinese_exact=require('mozc_v2_translator').chinese_exact_words(table_input,env.chinese_exact_translator,table_segment)
+    end
+    input = spelling
+    segment = Segment(table_segment.start, table_segment.start + #spelling)
+    segment.tags = Set({"abc"})
+  end
+  local function emit(candidate)
+    if table_input then
+      -- Never relabel an existing exact surface with a different fuzzy
+      -- reading (帰りたい -> がえりたい). Later deduplication keeps only one
+      -- identity, so that relabeling erased exact grammar/ranking evidence.
+      if table_exact[candidate.text] then return end
+      -- A fuzzy Japanese alias must not steal the identity of a complete
+      -- native Chinese word either (riben/日本 -> fuzzy りーべん).
+      if chinese_exact[candidate.text] then return end
+      local comment = candidate.comment or ""
+      local unchanged = comment:match("^%[JF:COMBINED%](.-)%[%[JF_TYPED:")
+      -- The imported-table route already supplies cost-ranked exact words
+      -- and sentences. Do not reintroduce its unscored homophone products
+      -- through an unchanged dictionary/prism query.
+      if unchanged == input or not comment:find("[JF:", 1, true) then return end
+      local rebased = Candidate("japanese_input_table_fuzzy", table_segment.start, table_segment._end,
+          candidate.text, candidate.comment)
+      rebased.quality = 99900
+      rebased.preedit = context:get_option("japanese_input_table_show_letters") and table_input or table_kana
+      yield(rebased)
+    else yield(candidate) end
+  end
   local generation = context:get_property("japanese_fuzzy_rules_generation") or ""
   if generation ~= env.custom_rules_generation then
     env.custom_rules = load_custom_rules()
@@ -91,7 +133,7 @@ function M.func(input, segment, env)
           local held = Candidate("completion", segment.start, segment._end,
                                  text, "[JP:PREFIX]")
           held.quality = 199 - index
-          yield(held)
+          emit(held)
         end
         return
       end
@@ -313,6 +355,9 @@ function M.func(input, segment, env)
         local first, last = source:find(from, start, true)
         if not first then break end
         add_query(source:sub(1, first - 1) .. to .. source:sub(last + 1))
+        if source:sub(last + 1, last + #from) == from then
+          add_query(source:sub(1, first - 1) .. to .. to .. source:sub(last + #from + 1))
+        end
         start = first + 1
       end
     end
@@ -361,6 +406,34 @@ function M.func(input, segment, env)
     end
   end
   local seen = {}
+  -- New compositions only use exact whole-word dictionary entries. Keep the
+  -- existing single/hand-combined routes unchanged when this switch is off.
+  local stem=protected_suffix and compact:sub(1,-#protected_suffix-1) or compact
+  local hits={}
+  for _,variant in ipairs(multi.variants(stem,context,env.custom_rules)) do
+    local query=variant.code..(protected_suffix or '')
+    if env.exact_memory:dict_lookup(query,false,8) then
+      for entry in env.exact_memory:iter_dict() do
+        local decoded=env.exact_memory:decode(entry.code)
+        if decoded and table.concat(decoded,'')==query then
+          hits[#hits+1]={entry=entry,query=query,rules=variant.rules,depth=variant.depth,weight=tonumber(entry.weight) or 0}
+        end
+      end
+    end
+  end
+  table.sort(hits,function(a,b) if a.depth~=b.depth then return a.depth<b.depth end;if a.weight~=b.weight then return a.weight>b.weight end;return a.query<b.query end)
+  local multi_count=0
+  for _,hit in ipairs(hits) do
+    local key=hit.entry.text..'\0'..hit.query
+    if not seen[key] then
+      seen[key]=true
+      local phrase=Phrase(env.exact_memory,'japanese_fuzzy',segment.start,segment._end,hit.entry)
+      phrase.comment='[JF:MULTI]'..hit.query..'[[JF_TYPED:'..compact..']][[JF_MULTI_RULES:'..hit.rules..']]'
+      local candidate=phrase:toCandidate();candidate.quality=199
+      emit(candidate);multi_count=multi_count+1
+      if multi_count>=24 then break end
+    end
+  end
   -- Compose a complete polite question from an exact Japanese stem before
   -- querying the broad fuzzy prism.  The normal Japanese sentence candidate
   -- can arrive extremely late (waruidesuka -> 悪いですか), after hundreds
@@ -401,7 +474,7 @@ function M.func(input, segment, env)
               )
               composed.preedit = compact
               composed.quality = 200
-              yield(composed)
+              emit(composed)
               composed_count = composed_count + 1
               if has_han then composed_han = true else composed_hiragana = true end
               if composed_count >= 2 then break end
@@ -440,7 +513,7 @@ function M.func(input, segment, env)
                 )
                 marked.quality = 199
                 remember_completed(env, compact, marked.text)
-                yield(marked)
+                emit(marked)
               end
             end
           end
@@ -482,7 +555,7 @@ function M.func(input, segment, env)
             -- prefix candidates before the ranking filter ever saw it.
             candidate.quality = 199
             remember_completed(env, compact, candidate.text)
-            yield(candidate)
+            emit(candidate)
           end
         end
       end
@@ -500,7 +573,7 @@ function M.func(input, segment, env)
         )
         marked.quality = 199
         remember_completed(env, compact, marked.text)
-        yield(marked)
+        emit(marked)
       end
     end
   end

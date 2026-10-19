@@ -1,0 +1,46 @@
+customization:
+  distribution_code_name: Zhongri
+  distribution_version: 2.0.0
+  generator: "Weasel::UIStyleSettings"
+  modified_time: "Sat Jul 18 18:55:41 2026"
+  rime_version: 1.13.1
+patch:
+  "preset_color_schemes/android/reserved_phrase_text_color": 0xFFF65C8B
+  "preset_color_schemes/android/back_color": 0xFF424242
+  "preset_color_schemes/android/comment_text_color": 0xFFEFEFEF
+  "preset_color_schemes/android/hilited_candidate_back_color": 0xFFC6C01A
+  "preset_color_schemes/android/hilited_candidate_text_color": 0xFFEFEFEF
+  "style/font_point": 12
+  "preset_color_schemes/android/fuzzy_correction_text_color": 0xFFF65C8B
+  "style/expanded_comment_align_label": true
+  "style/expanded_comment_width": false
+  "style/hover_comment_scroll": false
+  "style/inline_preedit_raw_input": true
+  "style/color_scheme": android
+  # Per-language candidate colors (ABGR). Text defaults to Chinese white and
+  # Japanese teal; transparent backgrounds continue to use the theme panel.
+  "preset_color_schemes/android/chinese_candidate_text_color": 0xFFF2F2F2
+  "preset_color_schemes/android/chinese_candidate_back_color": 0x00000000
+  "preset_color_schemes/android/japanese_candidate_text_color": 0xFF00FFFF
+  "preset_color_schemes/android/japanese_candidate_back_color": 0x00000000
+  "preset_color_schemes/android/common_phrase_candidate_text_color": 0xFFF2F2F2
+  "preset_color_schemes/android/common_phrase_candidate_back_color": 0x00000000
+  "style/display_tray_icon": true
+  "style/horizontal": true
+  "style/inline_preedit": false
+  "style/layout/border": 0
+  "style/layout/border_width": 0
+  "style/layout/candidate_spacing": 4
+  "style/layout/hilite_padding": 8
+  "style/layout/hilite_spacing": 4
+  "style/layout/margin_x": 8
+  "style/layout/margin_y": 8
+  "style/layout/max_height": 600
+  "style/comment_below": true
+  "style/comment_font_point": 8
+  "style/layout/max_width": 0
+  "style/layout/min_height": 96
+  # 单行候选窗按当前候选内容自适应；最长候选决定宽度。
+  "style/layout/min_width": 520
+  "style/layout/round_corner": 10
+  "style/layout/spacing": 8

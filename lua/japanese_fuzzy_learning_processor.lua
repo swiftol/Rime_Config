@@ -54,11 +54,19 @@ function M.init(env)
   -- later select_notifier listeners run. commit_notifier runs before Clear(),
   -- so the selected candidate and the original input are still available.
   env.notifier = env.engine.context.commit_notifier:connect(function(context)
-    if context:get_option("japanese_input_table_enabled") then return end
+    require("japanese_learning_commit").capture(context)
     local candidate = context:get_selected_candidate()
     if not candidate then env.recent_han = {}; return end
     local comment = candidate.comment or ""
     local input = (context.input or ""):lower():gsub("[%s']+", "")
+    if context:get_option("japanese_input_table_enabled") then
+      if comment:sub(1, 12) == "[JF_READING]" then
+        local spelling = require("japanese_input_table").fuzzy_spelling(context.input or "", context)
+        if spelling then learning.increment(spelling, candidate.text) end
+      end
+      env.recent_han = {}
+      return
+    end
     if comment:sub(1, 12) == "[JF_READING]" then
       learning.increment(input, candidate.text)
     end

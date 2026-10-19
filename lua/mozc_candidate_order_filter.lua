@@ -434,10 +434,30 @@ local function promote_learned_initial_in_syllable(items, typed)
 end
 
 local function filter(input, env)
+  local generation=env.engine.context:get_property('chinese_correction_generation') or ''
+  if env.hot_settings_generation~=generation then
+    env.hot_settings_generation=generation
+    nonempty_frames,nonempty_frame_order={},{}
+  end
   if env.engine.context:get_option("japanese_input_table_enabled") then
     if env.engine.context:get_option("japanese_input_table_mixed") then
       local candidates = {}
-      for cand in input:iter() do candidates[#candidates + 1] = cand end
+      -- Ranking the first page must not enumerate the entire Chinese
+      -- dictionary (especially A/s and other one-key prefixes). Learned
+      -- translators already emit their promoted entries near the head.
+      -- Keep a bounded ranking window and retain the remaining iterator:
+      -- deeper results are generated only when the user browses to them.
+      local iterator, state, control = input:iter()
+      local function next_candidate()
+        local cand = iterator(state, control)
+        control = cand
+        return cand
+      end
+      for _ = 1, (#(env.engine.context.input or '') == 1 and 32 or 128) do
+        local cand = next_candidate()
+        if not cand then break end
+        candidates[#candidates + 1] = cand
+      end
       local learned, learned_indices = {}, {}
       for index, cand in ipairs(candidates) do
         if cand.type == "chinese_abbreviation_learning" then
@@ -453,12 +473,39 @@ local function filter(input, env)
       -- Imported tables bypass the default sorter, but must still honour
       -- emoji placement after shared Chinese frequency promotion.
       local unique, seen = {}, {}
+      local physical = (context.input or ''):lower():gsub("[%s']+", '')
+      local function relevant_symbol(cand)
+        if not contains_emoji(cand.text) or cand.type == 'emoji_learning' then return true end
+        if not physical:match('^[a-z]+$') then return true end
+        -- A simplifier's symbol for a partial Chinese syllable is not a
+        -- Chinese translation of the Japanese input. Keep complete explicit
+        -- Chinese readings and learned symbols, never fill a lane with these.
+        return routing.is_complete_pinyin(physical) and
+            (cand.preedit or ''):lower():gsub("[%s']+", '') == physical and
+            cand.start == 0 and cand._end == #(context.input or '')
+      end
       for _, cand in ipairs(candidates) do
-        if not seen[cand.text] then
+        if relevant_symbol(cand) and not seen[cand.text] then
           seen[cand.text] = true
           unique[#unique + 1] = cand
         end
       end
+      -- Imported Japanese spelling must not redefine Chinese exactness.
+      -- Keep genuine whole-code dictionary phrases ahead of prefix guesses;
+      -- final semantic ordering still handles supported reserved expressions.
+      local exact_chinese, remaining = {}, {}
+      for _, cand in ipairs(unique) do
+        local exact = false
+        if cand.type == 'phrase' or cand.type == 'user_phrase' then
+          local reading, chinese = require('chinese_hot_correction').canonical(cand, env)
+          exact = chinese and reading and reading:gsub("[%s']+", '') == physical and
+              cand.start == 0 and cand._end == #(context.input or '')
+        end
+        local bucket = exact and exact_chinese or remaining
+        bucket[#bucket + 1] = cand
+      end
+      unique = exact_chinese
+      for _, cand in ipairs(remaining) do unique[#unique + 1] = cand end
       if context:get_option("emoji_second_position") then
         local normal, learned_emoji, generated = {}, {}, {}
         for _, cand in ipairs(unique) do
@@ -477,6 +524,12 @@ local function filter(input, env)
         for _, cand in ipairs(generated) do yield(cand) end
       else
         for _, cand in ipairs(unique) do yield(cand) end
+      end
+      for cand in next_candidate do
+        if relevant_symbol(cand) and not seen[cand.text] then
+          seen[cand.text] = true
+          yield(cand)
+        end
       end
     else
       for cand in input:iter() do yield(cand) end

@@ -5,6 +5,11 @@ local sequence = 0
 local instance = tostring({}):gsub("[^%w]", "")
 local mailbox = rime_api.get_user_data_dir() .. "/mozc_v2_mailbox"
 local clean_conversion_cache = {}
+local prediction_readings = {}
+local lexical_readings = {}
+local sentence_evidence = {}
+local lexical_surfaces = {}
+local native_evidence = {}
 local clean_conversion_order = {}
 local CLEAN_CACHE_LIMIT = 256
 local sentence_lexicon
@@ -564,6 +569,24 @@ local function lexical_sentence_candidate(input)
 end
 
 M.is_complete_pinyin = is_complete_pinyin
+-- Source-dictionary evidence only, not a cloud guess or prefix completion.
+function M.chinese_exact_words(code,translator,segment)
+  local result={}
+  code=(code or ''):lower():gsub("[%s']+",'')
+  if not translator or not is_complete_pinyin(code) then return result end
+  local query=Segment(segment and segment.start or 0,(segment and segment.start or 0)+#code)
+  query.tags=Set({'abc'})
+  local values=translator:query(code,query)
+  if not values then return result end
+  local count=0
+  for entry in values:iter() do
+    count=count+1
+    local spelling=(entry.preedit or ''):lower():gsub("[%s']+",'')
+    if spelling==code and entry.type~='sentence' and entry.type~='completion' then result[entry.text]=true end
+    if count>=32 then break end
+  end
+  return result
+end
 M.is_single_pinyin_syllable = function(input)
   input = (input or ""):lower():gsub("[%s']+", "")
   return pinyin[input] == true
@@ -685,17 +708,51 @@ local function query(input)
         " line=" .. tostring(line))
     return nil
   end
+  if input:sub(1,10)=='MOZC_EDIT:' then
+    local rows={}
+    for row in payload:gmatch('[^\t]+') do
+      if row:sub(1,8)~='EDITSEG:' or #rows>=32 then return nil end
+      rows[#rows+1]=row
+    end
+    return #rows>0 and rows or nil
+  end
   local result = {}
   for text in payload:gmatch("[^\t]+") do result[#result + 1] = text end
   local clean, clean_seen = {}, {}
+  local readings = {}
+  local evidence = {}
+  local native = {}
+  local lexical = false
   for _, value in ipairs(result) do
+    local native_surface, rank, native_cost, segments=value:match('^(.-)'..string.char(29)..'MOZC:(%d+):(%-?%d+):(%d+)$')
+    if native_surface then
+      value=native_surface
+      if not native[value] then native[value]={rank=tonumber(rank),cost=tonumber(native_cost),segments=tonumber(segments),source='mozc-native'} end
+    elseif input:sub(1,10)=='MOZC_KANA:' then
+      -- An older/mixed bridge must never silently satisfy the native route.
+      value=''
+    end
+    local surface, cost, unknown = value:match("^(.-)" .. string.char(30) .. "(%-?%d+),(%d+)$")
+    if surface then
+      value = surface
+      evidence[surface] = {cost=tonumber(cost), unknown=tonumber(unknown)}
+    end
+    local text, predicted = value:match("^(.-)" .. string.char(31) .. "(.+)$")
+    if text then
+      value = text
+      if input == "KANA:" .. predicted then
+        lexical = true
+        lexical_surfaces[input] = lexical_surfaces[input] or {}
+        lexical_surfaces[input][text] = true
+      else readings[text] = predicted end
+    end
     -- In this productive question grammar, kana なん is ordinarily written
     -- with the common kanji 何.  The mailbox bridge otherwise offers only the
     -- all-kana form even though the same standalone Mozc engine knows 何.
     if input == "korehanandesuka" then
       value = value:gsub("なんですか", "何ですか")
     end
-    if not contains_ascii_letter(value) and not clean_seen[value] then
+    if value~='' and not contains_ascii_letter(value) and not clean_seen[value] then
       clean_seen[value] = true
       clean[#clean + 1] = value
       -- Whole-sentence n-best paths and fair per-segment alternatives now
@@ -719,9 +776,18 @@ local function query(input)
       if #clean_conversion_order > CLEAN_CACHE_LIMIT then
         local oldest = table.remove(clean_conversion_order, 1)
         clean_conversion_cache[oldest] = nil
+        prediction_readings[oldest] = nil
+        lexical_readings[oldest] = nil
+        lexical_surfaces[oldest] = nil
+        sentence_evidence[oldest] = nil
+        native_evidence[oldest] = nil
       end
     end
     clean_conversion_cache[input] = clean
+    prediction_readings[input] = readings
+    lexical_readings[input] = lexical
+    sentence_evidence[input] = evidence
+    native_evidence[input] = native
   end
   -- Never expose Mozc's raw/partially converted Latin fallback as a Japanese
   -- candidate.  The clean list was already computed and cached above; the
@@ -733,6 +799,30 @@ end
 function M.query_kana(reading)
   local code = "KANA:" .. reading
   return clean_conversion_cache[code] or query(code)
+end
+
+function M.query_native_kana(reading)
+  local code='MOZC_KANA:'..reading
+  return clean_conversion_cache[code] or query(code)
+end
+function M.query_segment_edit(payload)
+  return query('MOZC_EDIT:'..payload)
+end
+function M.native_evidence(reading,text)
+  return (native_evidence['MOZC_KANA:'..reading] or {})[text]
+end
+
+function M.predicted_reading(reading, text)
+  return (prediction_readings["KANA:" .. reading] or {})[text]
+end
+
+function M.lexical_kana(reading, text)
+  if text then return (lexical_surfaces["KANA:" .. reading] or {})[text] == true end
+  return lexical_readings["KANA:" .. reading] == true
+end
+
+function M.sentence_evidence(reading, text)
+  return (sentence_evidence["KANA:" .. reading] or {})[text]
 end
 
 -- A bare n before a vowel or y is ambiguous across word boundaries:

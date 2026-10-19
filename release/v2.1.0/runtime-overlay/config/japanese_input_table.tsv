@@ -1,0 +1,1785 @@
+# zhongri-key-tails: 48=おう
+# zhongri-key-tails: 113=あい
+# zhongri-key-tails: 119=えい
+# zhongri-key-tails: 101=え
+# zhongri-key-tails: 114=えつ
+# zhongri-key-tails: 116=いつ
+# zhongri-key-tails: 117=う
+# zhongri-key-tails: 105=い
+# zhongri-key-tails: 111=お
+# zhongri-key-tails: 112=おく
+# zhongri-key-tails: 97=あ
+# zhongri-key-tails: 115=あく
+# zhongri-key-tails: 100=えん
+# zhongri-key-tails: 102=あつ
+# zhongri-key-tails: 103=おつ
+# zhongri-key-tails: 104=うう
+# zhongri-key-tails: 106=うん
+# zhongri-key-tails: 107=いん
+# zhongri-key-tails: 108=おん
+# zhongri-key-tails: 122=あん
+# zhongri-key-tails: 120=うつ/うい
+# zhongri-key-tails: 99=うく
+# zhongri-key-tails: 118=いく
+# zhongri-key-tails: 98=あぶ
+# zhongri-key-tails: 110=ん
+# zhongri-key-tails: 109=えき
+# zhongri-key-tails: 65=あら
+# zhongri-key-tails: 68=えん
+# zhongri-key-tails: 69=え
+# zhongri-key-tails: 72=うく
+# zhongri-key-tails: 73=いき
+# zhongri-key-tails: 74=うん
+# zhongri-key-tails: 75=いん
+# zhongri-key-tails: 78=あん
+# zhongri-key-tails: 79=お
+# zhongri-key-tails: 80=おん
+# zhongri-key-tails: 81=あえ
+# zhongri-key-tails: 82=あら
+# zhongri-key-tails: 83=ある
+# zhongri-key-tails: 84=いち
+# zhongri-key-tails: 85=う
+# zhongri-key-tails: 86=いぶ
+# zhongri-key-tails: 87=えい
+# zhongri-key-tails: 88=よう
+# zhongri-key-tails: 90=あん
+# zhongri-key-action: 47=input
+# zhongri-key-action: 61=next
+# zhongri-key-empty-first: 65
+# zhongri-key-action: 65=input
+# zhongri-key-action: 68=input
+# zhongri-key-action: 71=input
+# zhongri-key-action: 72=input
+# zhongri-key-action: 73=input
+# zhongri-key-action: 74=input
+# zhongri-key-action: 75=input
+# zhongri-key-action: 76=input
+# zhongri-key-action: 77=input
+# zhongri-key-action: 78=input
+# zhongri-key-action: 80=input
+# zhongri-key-action: 81=input
+# zhongri-key-action: 82=input
+# zhongri-key-action: 83=input
+# zhongri-key-action: 84=input
+# zhongri-key-empty-first: 86
+# zhongri-key-action: 86=input
+# zhongri-key-action: 90=input
+# zhongri-key-action: 97=input
+# zhongri-key-action: 98=input
+# zhongri-key-action: 99=input
+# zhongri-key-action: 102=input
+# zhongri-key-action: 103=input
+# zhongri-key-action: 108=input
+# zhongri-key-action: 109=input
+# zhongri-key-action: 110=input
+# zhongri-key-action: 112=input
+# zhongri-key-action: 113=input
+# zhongri-key-action: 114=input
+# zhongri-key-action: 115=input
+# zhongri-key-action: 116=input
+# zhongri-key-action: 118=input
+# zhongri-key-action: 120=input
+# zhongri-key-action: 121=input
+# zhongri-key-long-press: 70=500,4166,input
+# zhongri-key-long-press: 102=200,4166,input
+# zhongri-single-key-tail: 0
+# zhongri-reserved-whole: 1
+# zhongri-key-variants: qx=きゅつ/きゅい
+# zhongri-key-variants: wx=うつ/うい
+# zhongri-key-variants: rx=るつ/るい
+# zhongri-key-variants: tx=つつ/つい
+# zhongri-key-variants: yx=ゆつ/ゆい
+# zhongri-key-variants: px=ぷつ/ぷい
+# zhongri-key-variants: sx=すつ/すい
+# zhongri-key-variants: dx=づつ/づい
+# zhongri-key-variants: fx=ふつ/ふい
+# zhongri-key-variants: gx=ぐつ/ぐい
+# zhongri-key-variants: hx=ふつ/ふい
+# zhongri-key-variants: jx=じゅつ/じゅい
+# zhongri-key-variants: kx=くつ/くい
+# zhongri-key-variants: lx=りゅつ/りゅい
+# zhongri-key-variants: zx=ずつ/ずい
+# zhongri-key-variants: xx=しゅつ/しゅい
+# zhongri-key-variants: cx=ちゅつ/ちゅい
+# zhongri-key-variants: vx=ゔつ/ゔい
+# zhongri-key-variants: bx=ぶつ/ぶい
+# zhongri-key-variants: nx=ぬつ/ぬい
+# zhongri-key-variants: mx=むつ/むい
+# zhongri-key-variants: Ax=うつ/うい
+# zhongri-key-variants: Fx=ふつ/ふい
+# zhongri-key-variants: Gx=ぎゅつ/ぎゅい
+# zhongri-key-variants: Hx=ひゅつ/ひゅい
+# zhongri-key-variants: Nx=にゅつ/にゅい
+# zhongri-key-variants: Qx=きゅつ/きゅい
+# zhongri-key-variants: Rx=るつ/るい
+# zhongri-key-variants: Tx=つつ/つい
+# zhongri-key-variants: Vx=うつ/うい
+# zhongri-fixed: kt
+# zhongri-reserved-variants: kt=こと/かった
+# zhongri-normal-reading: kt=きつ;
+# zhongri-alternative: kt=きつ
+# zhongri-fixed: st
+# zhongri-reserved-variants: st=した
+# zhongri-normal-reading: st=しつ;
+# zhongri-alternative: st=しつ
+# zhongri-fixed: tt
+# zhongri-reserved-variants: tt=たち
+# zhongri-normal-reading: tt=ちつ;
+# zhongri-alternative: tt=ちつ
+# zhongri-fixed: ht
+# zhongri-reserved-variants: ht=ひと
+# zhongri-normal-reading: ht=ひつ;
+# zhongri-alternative: ht=ひつ
+# zhongri-fixed: wt
+# zhongri-reserved-variants: wt=わた
+# zhongri-normal-reading: wt=うぃつ;
+# zhongri-alternative: wt=うぃつ
+# zhongri-fixed: mn
+# zhongri-reserved-variants: mn=もの
+# zhongri-normal-reading: mn=;mn
+# zhongri-fixed: ms
+# zhongri-reserved-variants: ms=ます
+# zhongri-normal-reading: ms=まく;
+# zhongri-alternative: ms=まく
+# zhongri-fixed: ds
+# zhongri-reserved-variants: ds=です
+# zhongri-normal-reading: ds=だく;
+# zhongri-alternative: ds=だく
+# zhongri-fixed: km
+# zhongri-reserved-variants: km=かも
+# zhongri-normal-reading: km=けき;
+# zhongri-alternative: km=けき
+# zhongri-fixed: tm
+# zhongri-reserved-variants: tm=ため
+# zhongri-normal-reading: tm=てき;
+# zhongri-alternative: tm=てき
+# zhongri-fixed: dm
+# zhongri-reserved-variants: dm=でも
+# zhongri-normal-reading: dm=でき;
+# zhongri-alternative: dm=でき
+# zhongri-fixed: kr
+# zhongri-reserved-variants: kr=から
+# zhongri-normal-reading: kr=けつ;
+# zhongri-alternative: kr=けつ
+# zhongri-fixed: sr
+# zhongri-reserved-variants: sr=する
+# zhongri-normal-reading: sr=せつ;
+# zhongri-alternative: sr=せつ
+# zhongri-fixed: tr
+# zhongri-reserved-variants: tr=たら
+# zhongri-normal-reading: tr=てつ;
+# zhongri-alternative: tr=てつ
+# zhongri-fixed: nr
+# zhongri-reserved-variants: nr=なる
+# zhongri-normal-reading: nr=ねつ;
+# zhongri-alternative: nr=ねつ
+# zhongri-fixed: yr
+# zhongri-reserved-variants: yr=よる
+# zhongri-normal-reading: yr=いぇつ;
+# zhongri-alternative: yr=いぇつ
+# zhongri-fixed: rr
+# zhongri-reserved-variants: rr=られ
+# zhongri-normal-reading: rr=れつ;
+# zhongri-alternative: rr=れつ
+# zhongri-fixed: zr
+# zhongri-reserved-variants: zr=ざる
+# zhongri-normal-reading: zr=ぜつ;
+# zhongri-alternative: zr=ぜつ
+# zhongri-fixed: mt
+# zhongri-reserved-variants: mt=また
+# zhongri-normal-reading: mt=みつ;
+# zhongri-alternative: mt=みつ
+# zhongri-fixed: tb
+# zhongri-reserved-variants: tb=たび
+# zhongri-normal-reading: tb=たぶ;
+# zhongri-alternative: tb=たぶ
+# zhongri-fixed: nb
+# zhongri-reserved-variants: nb=ねば
+# zhongri-normal-reading: nb=なぶ;
+# zhongri-alternative: nb=なぶ
+# zhongri-fixed: bt
+# zhongri-reserved-variants: bt=びと
+# zhongri-normal-reading: bt=びつ;
+# zhongri-alternative: bt=びつ
+# zhongri-fixed: gr
+# zhongri-reserved-variants: gr=がら
+# zhongri-normal-reading: gr=げつ;
+# zhongri-alternative: gr=げつ
+# zhongri-fixed: gt
+# zhongri-reserved-variants: gt=ごと
+# zhongri-normal-reading: gt=ぎつ;
+# zhongri-alternative: gt=ぎつ
+# zhongri-fixed: nt
+# zhongri-reserved-variants: nt=にち
+# zhongri-normal-reading: nt=につ;
+# zhongri-alternative: nt=につ
+# zhongri-fixed: dt
+# zhongri-reserved-variants: dt=だち
+# zhongri-normal-reading: dt=ぢつ;
+# zhongri-alternative: dt=ぢつ
+# zhongri-fixed: wr
+# zhongri-reserved-variants: wr=われ
+# zhongri-normal-reading: wr=うぇつ;
+# zhongri-alternative: wr=うぇつ
+# zhongri-fixed: mst
+# zhongri-reserved-variants: mst=ました
+# zhongri-normal-reading: mst=まく;t
+# zhongri-fixed: msn
+# zhongri-reserved-variants: msn=ません
+# zhongri-normal-reading: msn=まく;n
+# zhongri-fixed: msnd
+# zhongri-reserved-variants: msnd=ませんでした
+# zhongri-normal-reading: msnd=まくねん;
+# zhongri-fixed: dst
+# zhongri-reserved-variants: dst=でした
+# zhongri-normal-reading: dst=だく;t
+# zhongri-fixed: srr
+# zhongri-reserved-variants: srr=される
+# zhongri-normal-reading: srr=せつ;r
+# zhongri-fixed: tir
+# zhongri-reserved-variants: tir=ている
+# zhongri-normal-reading: tir=ち;r
+# zhongri-fixed: tim
+# zhongri-reserved-variants: tim=ています
+# zhongri-normal-reading: tim=ち;m
+# zhongri-fixed: ddn
+# zhongri-reserved-variants: ddn=だけでなく
+# zhongri-normal-reading: ddn=でん;n
+# zhongri-fixed: ndn
+# zhongri-reserved-variants: ndn=ので
+# zhongri-normal-reading: ndn=ねん;n
+# zhongri-fixed: smms
+# zhongri-reserved-variants: smms=すみません
+# zhongri-normal-reading: smms=せきまく;
+# zhongri-fixed: arg
+# zhongri-reserved-variants: arg=ありがとうございます
+# zhongri-normal-reading: arg=あろつ;
+# zhongri-fixed: yrsk
+# zhongri-reserved-variants: yrsk=よろしくおねがいします
+# zhongri-normal-reading: yrsk=いぇつしん;
+# zhongri-fixed: msy
+# zhongri-reserved-variants: msy=ましょう
+# zhongri-normal-reading: msy=まく;y
+# zhongri-fixed: msyk
+# zhongri-reserved-variants: msyk=ましょうか
+# zhongri-normal-reading: msyk=まく;yk
+# zhongri-fixed: msk
+# zhongri-reserved-variants: msk=ますか
+# zhongri-normal-reading: msk=まく;k
+# zhongri-fixed: msnk
+# zhongri-reserved-variants: msnk=ませんか
+# zhongri-normal-reading: msnk=まくにん;
+# zhongri-fixed: dsk
+# zhongri-reserved-variants: dsk=ですか
+# zhongri-normal-reading: dsk=だく;k
+# zhongri-fixed: dsn
+# zhongri-reserved-variants: dsn=ですね
+# zhongri-normal-reading: dsn=だく;n
+# zhongri-fixed: dsy
+# zhongri-reserved-variants: dsy=ですよ
+# zhongri-normal-reading: dsy=だく;y
+# zhongri-fixed: djnkt
+# zhongri-reserved-variants: djnkt=ではなかった
+# zhongri-normal-reading: djnkt=づんにん;t
+# zhongri-fixed: djarm
+# zhongri-reserved-variants: djarm=ではありません
+# zhongri-normal-reading: djarm=づんあれき;
+# zhongri-fixed: djarmd
+# zhongri-reserved-variants: djarmd=ではありませんでした
+# zhongri-normal-reading: djarmd=づんあれき;d
+# zhongri-fixed: jni
+# zhongri-reserved-variants: jni=じゃない
+# zhongri-normal-reading: jni=;jni
+# zhongri-fixed: jnkt
+# zhongri-reserved-variants: jnkt=じゃなかった
+# zhongri-normal-reading: jnkt=;jnkt
+# zhongri-fixed: ndar
+# zhongri-reserved-variants: ndar=のである
+# zhongri-normal-reading: ndar=ねんあ;r
+# zhongri-fixed: nds
+# zhongri-reserved-variants: nds=のです
+# zhongri-normal-reading: nds=ねんあく;
+# zhongri-fixed: ndesh
+# zhongri-reserved-variants: ndesh=んでした
+# zhongri-normal-reading: ndesh=ねんえすう;
+# zhongri-fixed: smst
+# zhongri-reserved-variants: smst=しました
+# zhongri-normal-reading: smst=せきしつ;
+# zhongri-fixed: nrni
+# zhongri-reserved-variants: nrni=ならない
+# zhongri-normal-reading: nrni=ねつに;
+# zhongri-fixed: dw
+# zhongri-reserved-variants: dw=では
+# zhongri-normal-reading: dw=でい;
+# zhongri-alternative: dw=でい
+# zhongri-fixed: ks
+# zhongri-reserved-variants: ks=こそ
+# zhongri-normal-reading: ks=かく;
+# zhongri-alternative: ks=かく
+# zhongri-fixed: md
+# zhongri-reserved-variants: md=まで
+# zhongri-normal-reading: md=めん;
+# zhongri-alternative: md=めん
+# zhongri-fixed: xmxt
+# zhongri-reserved-variants: xmxt=しました
+# zhongri-normal-reading: xmxt=しぇきしつ;
+# zhongri-fixed: dtd
+# zhongri-reserved-variants: dtd=だったんだ
+# zhongri-normal-reading: dtd=ぢつ;d
+# zhongri-fixed: mda
+# zhongri-reserved-variants: mda=まだ
+# zhongri-normal-reading: mda=めんあ;
+,	、	
+-	ー	
+.	。	
+:	ー	
+;	っ	
+a	あ	
+b0	ぼう	
+ba	ば	
+bd	べん	
+be	べ	
+bh	ぶう	
+bi	び	
+bj	ぶん	
+bk	びん	
+bm	べき	
+bo	ぼ	
+bp	ぼく	
+bs	ばく	
+bt	びと	
+bu	ぶ	
+bv	びく	
+bw	べい	
+bx	ぶつ	
+by0	びょう	
+bya	びゃ	
+byd	びぇん	
+bye	びぇ	
+byh	びゅう	
+byj	びゅん	
+byo	びょ	
+byp	びょく	
+bys	びゃく	
+byu	びゅ	
+byw	びぇい	
+byz	びゃん	
+bz	ばん	
+c0	ちょう	
+ca	ちゃ	
+cd	ちぇん	
+ce	ちぇ	
+cf	ちゃつ	
+ch	ちゅう	
+ci	ち	
+cj	ちゅん	
+ck	ちん	
+cm	ちぇき	
+co	ちょ	
+cp	ちょく	
+cs	ちゃく	
+cu	ちゅ	
+cw	ちぇい	
+cz	ちゃん	
+d0	どう	
+da	だ	
+dc0	どぅー	
+dch	でゅー	
+dci	でぃ	
+dcj	どぅん	
+dck	でぃん	
+dcu	どぅ	
+dcy	でぃー	
+dd	でん	
+de	で	
+df	だつ	
+dg	どつ	
+dh	づう	
+di	ぢ	
+dj	づん	
+dk	ぢん	
+dm	でも	
+dA	だら	
+do	ど	
+dp	どく	
+dr	でつ	
+ds	です	
+dt	だち	
+du	づ	
+dv	ぢく	
+dw	では	
+dx	づつ	
+dl	どん	
+dz	だん	
+e	え	
+f0	ふぉー	
+fa	ふぁ	
+fd	ふぇん	
+fe	ふぇ	
+fh	ふう	
+fi	ふぃ	
+fj	ふん	
+fk	ふぃん	
+fm	ふぇき	
+fo	ふぉ	
+fp	ふぉく	
+fs	ふぁく	
+fu	ふ	
+fv	ふぃく	
+fw	ふぇい	
+fyh	ふゅー	
+fyj	ふゅん	
+fyu	ふゅ	
+fz	ふぁん	
+g0	ごう	
+ga	が	
+gd	げん	
+ge	げ	
+gh	ぐう	
+gi	ぎ	
+gj	ぐん	
+gk	ぎん	
+gm	げき	
+go	ご	
+gp	ごく	
+gr	がら	
+gs	がく	
+gt	ごと	
+gu	ぐ	
+gv	ぎく	
+gw	げい	
+gx	ぐつ	
+gy0	ぎょう	
+gya	ぎゃ	
+gyd	ぎぇん	
+gye	ぎぇ	
+gyh	ぎゅう	
+gyj	ぎゅん	
+gyo	ぎょ	
+gyp	ぎょく	
+gys	ぎゃく	
+gyu	ぎゅ	
+gyw	ぎぇい	
+gyz	ぎゃん	
+gz	がん	
+h0	ほう	
+ha	は	
+hd	へん	
+he	へ	
+hf	はつ	
+hg0	ひょう	
+hga	ひゃ	
+hgd	ひぇん	
+hge	ひぇ	
+hgh	ひゅう	
+hgj	ひゅん	
+hgo	ひょ	
+hgp	ひょく	
+hgs	ひゃく	
+hgu	ひゅ	
+hgw	ひぇい	
+hgz	ひゃん	
+hh	ふう	
+hi	ひ	
+hj	ふん	
+hk	ひん	
+hm	へき	
+ho	ほ	
+hp	ほく	
+hr	へつ	
+hs	はく	
+ht	ひと	
+hu	ふ	
+hv	ひく	
+hw	へい	
+hx	ふつ	
+hy0	ひょう	
+hya	ひゃ	
+hyd	ひぇん	
+hye	ひぇ	
+hyh	ひゅう	
+hyj	ひゅん	
+hyo	ひょ	
+hyp	ひょく	
+hys	ひゃく	
+hyu	ひゅ	
+hyw	ひぇい	
+hyz	ひゃん	
+hz	はん	
+i	い	
+j0	じょう	
+ja	じゃ	
+jd	じぇん	
+je	じぇ	
+jf	じゃつ	
+jh	じゅう	
+ji	じ	
+jj	じゅん	
+jk	じん	
+jm	じぇき	
+jo	じょ	
+jp	じょく	
+js	じゃく	
+ju	じゅ	
+jw	じぇい	
+jz	じゃん	
+k0	こう	
+ka	か	
+kd	けん	
+ke	け	
+kf	かつ	
+kg0	きょう	
+kga	きゃ	
+kgd	きぇん	
+kge	きぇ	
+kgh	きゅう	
+kgj	きゅん	
+kgo	きょ	
+kgp	きょく	
+kgs	きゃく	
+kgu	きゅ	
+kgw	きぇい	
+kgz	きゃん	
+kh	くう	
+ki	き	
+kj	くん	
+kk	きん	
+km	かも	
+kA	から	
+ko	こ	
+kp	こく	
+kr	から	
+ks	こそ	
+kt	こと	
+ku	く	
+kv	きく	
+kw	けい	
+kx	くつ	
+ky0	きょう	
+kya	きゃ	
+kyd	きぇん	
+kye	きぇ	
+kyh	きゅう	
+kyj	きゅん	
+s	あく	
+kyo	きょ	
+kyp	きょく	
+kys	きゃく	
+kyu	きゅ	
+kyw	きぇい	
+kyz	きゃん	
+kz	かん	
+l0	りょう	
+l:	：	
+l;	；	
+la	りゃ	
+ld	れん	
+le	れ	
+lh	りゅう	
+li	り	
+lj	りゅん	
+lk	りん	
+lka	ヵ	
+lke	ヶ	
+lo	りょ	
+lp	りょく	
+ls	りゃく	
+ltu	っ	
+lu	りゅ	
+lw	れい	
+lwa	ゎ	
+lya	ゃ	
+lye	ぇ	
+lyi	ぃ	
+lyo	ょ	
+lyu	ゅ	
+lz	りゃん	
+m0	もう	
+ma	ま	
+md	まで	
+me	め	
+mf	まつ	
+mg0	みょう	
+mga	みゃ	
+mgd	みぇん	
+mge	みぇ	
+mgh	みゅう	
+mgj	みゅん	
+Z	あん	
+mgo	みょ	
+mgp	みょく	
+mgs	みゃく	
+mgu	みゅ	
+mgw	みぇい	
+mgz	みゃん	
+mh	むう	
+mi	み	
+mj	むん	
+mk	みん	
+mm	めき	
+mo	も	
+mp	もく	
+mr	めつ	
+ms	ます	
+mt	また	
+mu	む	
+mv	みく	
+mw	めい	
+mx	むつ	
+my0	みょう	
+mya	みゃ	
+myd	みぇん	
+myh	みゅう	
+myj	みゅん	
+S	あく	
+myo	みょ	
+myp	みょく	
+mys	みゃく	
+myu	みゅ	
+myw	みぇい	
+myz	みゃん	
+mz	まん	
+n0	のう	
+na	な	
+nb	ねば	
+nd	ねん	
+ne	ね	
+nf	なつ	
+ng0	にょう	
+nga	にゃ	
+ngd	にぇん	
+nge	にぇ	
+ngh	にゅう	
+ngj	にゅん	
+R	etsu	
+ngo	にょ	
+ngp	にょく	
+ngs	にゃく	
+ngu	にゅ	
+ngw	にぇい	
+ngz	にゃん	
+nh	ぬう	
+ni	に	
+nj	ぬん	
+nk	にん	
+nn	ん	
+no	の	
+np	のく	
+nr	なる	
+ns	なく	
+nt	にち	
+nu	ぬ	
+nv	にく	
+nw	ねい	
+nx	ぬつ	
+ny0	にょう	
+nya	にゃ	
+nyd	にぇん	
+nyh	にゅう	
+nyj	にゅん	
+P	おく	
+nyo	にょ	
+nyp	にょく	
+nys	にゃく	
+nyu	にゅ	
+nyw	にぇい	
+nyz	にゃん	
+nz	なん	
+o	お	
+p0	ぽう	
+pa	ぱ	
+pd	ぺん	
+pe	ぺ	
+pf	ぱつ	
+pg0	ぴょう	
+pga	ぴゃ	
+pgd	ぴぇん	
+pge	ぴぇ	
+pgh	ぴゅう	
+pgj	ぴゅん	
+M	えき	
+pgo	ぴょ	
+pgp	ぴょく	
+pgs	ぴゃく	
+pgu	ぴゅ	
+pgw	ぴぇい	
+pgz	ぴゃん	
+ph	ぷう	
+pi	ぴ	
+pj	ぷん	
+pk	ぴん	
+pm	ぺき	
+po	ぽ	
+pp	ぽく	
+ps	ぱく	
+pu	ぷ	
+pv	ぴく	
+pw	ぺい	
+px	ぷつ	
+py0	ぴょう	
+pya	ぴゃ	
+pyd	ぴぇん	
+pye	ぴぇ	
+pyh	ぴゅう	
+pyj	ぴゅん	
+L	おん	
+pyo	ぴょ	
+pyp	ぴょく	
+pys	ぴゃく	
+pyu	ぴゅ	
+pyw	ぴぇい	
+pyz	ぴゃん	
+pz	ぱん	
+q0	きょう	
+qa	きゃ	
+qd	きぇん	
+qe	きぇ	
+qh	きゅう	
+qj	きゅん	
+qm	きぇき	
+qo	きょ	
+qp	きょく	
+qs	きゃく	
+qu	きゅ	
+qw	きぇい	
+qz	きゃん	
+r0	ろう	
+ra	ら	
+rd	れん	
+re	れ	
+rh	るう	
+ri	り	
+rj	るん	
+rk	りん	
+rm	れき	
+ro	ろ	
+rp	ろく	
+rr	られ	
+rs	らく	
+ru	る	
+rv	りく	
+rw	れい	
+rx	るつ	
+ry0	りょう	
+rya	りゃ	
+ryd	りぇん	
+rye	りぇ	
+ryh	りゅう	
+ryj	りゅん	
+K	いん	
+ryo	りょ	
+ryp	りょく	
+rys	りゃく	
+ryu	りゅ	
+ryw	りぇい	
+ryz	りゃん	
+rz	らん	
+s0	そう	
+sa	さ	
+sd	せん	
+se	せ	
+sf	さつ	
+sh	すう	
+si	し	
+sj	すん	
+sk	しん	
+sm	せき	
+so	そ	
+sp	そく	
+sr	する	
+ss	さく	
+st	した	
+su	す	
+sv	しく	
+sw	せい	
+sx	すつ	
+sy0	しょう	
+sya	しゃ	
+syd	しぇん	
+sye	しぇ	
+syh	しゅう	
+syi	すぃ	
+syj	しゅん	
+syk	すぃん	
+J	うん	
+syo	しょ	
+syp	しょく	
+sys	しゃく	
+syu	しゅ	
+syw	しぇい	
+syz	しゃん	
+sz	さん	
+t0	とう	
+ta	た	
+tb	たび	
+tci	てぃ	
+tck	てぃん	
+td	てん	
+te	て	
+tg0	とぅー	
+tgh	てゅー	
+tgi	てぃ	
+tgj	とぅん	
+tgk	てぃん	
+tgu	とぅ	
+th	つう	
+ti	ち	
+tj	つん	
+tk	ちん	
+tm	ため	
+tA	たら	
+to	と	
+tp	とく	
+tr	たら	
+ts	たく	
+tsa	つぁ	
+tsd	つぇん	
+tse	つぇ	
+tsh	つう	
+tsi	つぃ	
+tsj	つん	
+tsk	つぃん	
+tso	つぉ	
+tsp	つぉく	
+tss	つぁく	
+tst	として	
+tsu	つ	
+tsz	つぁん	
+tt	たち	
+tu	つ	
+tw	てい	
+ty0	ちょう	
+tya	ちゃ	
+tyd	ちぇん	
+tye	ちぇ	
+tyh	ちゅう	
+tyj	ちゅん	
+D	えん	
+tyo	ちょ	
+typ	ちょく	
+tys	ちゃく	
+tyu	ちゅ	
+tyw	ちぇい	
+tyz	ちゃん	
+tz	たん	
+u	う	
+v0	ヴぉう	
+va	ヴぁ	
+vd	ヴぇん	
+ve	ヴぇ	
+vh	ヴー	
+vi	ヴぃ	
+vj	ヴん	
+vk	ヴぃん	
+vm	ゔぇき	
+vo	ヴぉ	
+vp	ゔぉく	
+vs	ゔぁく	
+vu	ヴ	
+vv	ゔぃく	
+vw	ヴぇい	
+vyu	ヴゅ	
+vz	ヴぁん	
+w0	うぉー	
+wa	わ	
+wd	うぇん	
+we	うぇ	
+wf	わつ	
+whe	ゑ	
+whi	ゐ	
+who	うぉ	
+wi	うぃ	
+wk	うぃん	
+wm	うぇき	
+wo	を	
+wp	をく	
+wr	われ	
+ws	わく	
+wso	うぉ	
+wt	わた	
+wz	わん	
+x0	しょう	
+x:	：	
+x;	；	
+xa	しゃ	
+xd	しぇん	
+xe	しぇ	
+xh	しゅう	
+xi	し	
+xj	しゅん	
+xk	しん	
+xm	しぇき	
+xo	しょ	
+xp	しょく	
+xs	しゃく	
+xu	しゅ	
+xv	しく	
+xw	しぇい	
+xz	しゃん	
+y0	よう	
+ya	や	
+yd	いぇん	
+ye	いぇ	
+yf	やつ	
+yh	ゆう	
+yj	ゆん	
+ym	いぇき	
+yo	よ	
+yp	よく	
+yr	よる	
+ys	やく	
+yu	ゆ	
+yw	いぇい	
+yz	やん	
+z0	ぞう	
+za	ざ	
+zc	ずく	
+zd	ぜん	
+ze	ぜ	
+zf	ざつ	
+zh	ずう	
+zi	じ	
+zj	ずん	
+zk	じん	
+zm	ぜき	
+zo	ぞ	
+zp	ぞく	
+zr	ざる	
+zs	ざく	
+zu	ず	
+zv	じく	
+zw	ぜい	
+zx	ずつ	
+zy0	じょう	
+zya	じゃ	
+zyd	じぇん	
+zye	じぇ	
+zyh	じゅう	
+zyj	じゅん	
+/	ー	
+zyo	じょ	
+zyp	じょく	
+zys	じゃく	
+zyu	じゅ	
+zyw	じぇい	
+zyz	じゃん	
+zz	ざん	
+qq	きゃい	
+qr	きぇつ	
+qt	きぃつ	
+qf	きゃつ	
+qg	きょつ	
+ql	きょん	
+qx	きゅつ	
+qc	きゅく	
+qv	きぃく	
+qb	きゃぶ	
+qA	きゃら	
+qD	きぇん	
+qH	きゅく	
+qI	きぃき	
+qJ	きゅん	
+qK	きぃん	
+qN	きゃん	
+qP	きょん	
+qQ	きゃえ	
+qR	きゃら	
+qS	きゃる	
+qT	きぃち	
+qV	きぃぶ	
+qZ	きゃん	
+wq	わい	
+wg	をつ	
+wl	をん	
+wx	うつ	
+wc	うく	
+wv	うぃく	
+wb	わぶ	
+wA	わら	
+wD	うぇん	
+wH	うく	
+wI	うぃき	
+wJ	うん	
+wK	うぃん	
+wN	わん	
+wP	をん	
+wQ	わえ	
+wR	わら	
+wS	わる	
+wT	うぃち	
+wV	うぃぶ	
+wZ	わん	
+rq	らい	
+rt	りつ	
+rf	らつ	
+rg	ろつ	
+rl	ろん	
+rc	るく	
+rb	らぶ	
+rA	らら	
+rD	れん	
+rH	るく	
+rI	りき	
+rJ	るん	
+rK	りん	
+rN	らん	
+rP	ろん	
+rQ	らえ	
+rR	らら	
+rS	らる	
+rT	りち	
+rV	りぶ	
+rZ	らん	
+tq	たい	
+tf	たつ	
+tg	とつ	
+tl	とん	
+tx	つつ	
+tc	つく	
+tv	ちく	
+tD	てん	
+tH	つく	
+tI	ちき	
+tJ	つん	
+tK	ちん	
+tN	たん	
+tP	とん	
+tQ	たえ	
+tR	たら	
+tS	たる	
+tT	ちち	
+tV	ちぶ	
+tZ	たん	
+yq	やい	
+yg	よつ	
+yl	よん	
+yx	ゆつ	
+yc	ゆく	
+yb	やぶ	
+yA	やら	
+yD	いぇん	
+yH	ゆく	
+yJ	ゆん	
+yN	やん	
+yP	よん	
+yQ	やえ	
+yR	やら	
+yS	やる	
+yZ	やん	
+pq	ぱい	
+pr	ぺつ	
+pt	ぴつ	
+pg	ぽつ	
+pl	ぽん	
+pc	ぷく	
+pb	ぱぶ	
+pA	ぱら	
+pD	ぺん	
+pH	ぷく	
+pI	ぴき	
+pJ	ぷん	
+pK	ぴん	
+pN	ぱん	
+pP	ぽん	
+pQ	ぱえ	
+pR	ぱら	
+pS	ぱる	
+pT	ぴち	
+pV	ぴぶ	
+pZ	ぱん	
+sq	さい	
+sg	そつ	
+sl	そん	
+sc	すく	
+sb	さぶ	
+sA	さら	
+sD	せん	
+sH	すく	
+sI	しき	
+sJ	すん	
+sK	しん	
+sN	さん	
+sP	そん	
+sQ	さえ	
+sR	さら	
+sS	さる	
+sT	しち	
+sV	しぶ	
+sZ	さん	
+dq	だい	
+dc	づく	
+db	だぶ	
+dD	でん	
+dH	づく	
+dI	ぢき	
+dJ	づん	
+dK	ぢん	
+dN	だん	
+dP	どん	
+dQ	だえ	
+dR	だら	
+dS	だる	
+dT	ぢち	
+dV	ぢぶ	
+dZ	だん	
+fq	ふぁい	
+fr	ふぇつ	
+ft	ふぃつ	
+ff	ふぁつ	
+fg	ふぉつ	
+fl	ふぉん	
+fx	ふつ	
+fc	ふく	
+fb	ふぁぶ	
+fA	ふぁら	
+fD	ふぇん	
+fH	ふく	
+fI	ふぃき	
+fJ	ふん	
+fK	ふぃん	
+fN	ふぁん	
+fP	ふぉん	
+fQ	ふぁえ	
+fR	ふぁら	
+fS	ふぁる	
+fT	ふぃち	
+fV	ふぃぶ	
+fZ	ふぁん	
+gq	がい	
+gf	がつ	
+gg	ごつ	
+gl	ごん	
+gc	ぐく	
+gb	がぶ	
+gA	がら	
+gD	げん	
+gH	ぐく	
+gI	ぎき	
+gJ	ぐん	
+gK	ぎん	
+gN	がん	
+gP	ごん	
+gQ	がえ	
+gR	がら	
+gS	がる	
+gT	ぎち	
+gV	ぎぶ	
+gZ	がん	
+hq	はい	
+hg	ほつ	
+hl	ほん	
+hc	ふく	
+hb	はぶ	
+hA	はら	
+hD	へん	
+hH	ふく	
+hI	ひき	
+hJ	ふん	
+hK	ひん	
+hN	はん	
+hP	ほん	
+hQ	はえ	
+hR	はら	
+hS	はる	
+hT	ひち	
+hV	ひぶ	
+hZ	はん	
+jq	じゃい	
+jr	じぇつ	
+jt	じつ	
+jg	じょつ	
+jl	じょん	
+jx	じゅつ	
+jc	じゅく	
+jv	じく	
+jb	じゃぶ	
+jA	じゃら	
+jD	じぇん	
+jH	じゅく	
+jI	じき	
+jJ	じゅん	
+jK	じん	
+jN	じゃん	
+jP	じょん	
+jQ	じゃえ	
+jR	じゃら	
+jS	じゃる	
+jT	じち	
+jV	じぶ	
+jZ	じゃん	
+kq	かい	
+kg	こつ	
+kl	こん	
+kc	くく	
+kb	かぶ	
+kD	けん	
+kH	くく	
+kI	きき	
+kJ	くん	
+kK	きん	
+kN	かん	
+kP	こん	
+kQ	かえ	
+kR	から	
+kS	かる	
+kT	きち	
+kV	きぶ	
+kZ	かん	
+lq	りゃい	
+lr	りぇつ	
+lt	りぃつ	
+lf	りゃつ	
+lg	りょつ	
+ll	りょん	
+lx	りゅつ	
+lc	りゅく	
+lv	りぃく	
+lb	りゃぶ	
+lm	りぇき	
+lA	りゃら	
+lD	りぇん	
+lH	りゅく	
+lI	りぃき	
+lJ	りゅん	
+lK	りぃん	
+lN	りゃん	
+lP	りょん	
+lQ	りゃえ	
+lR	りゃら	
+lS	りゃる	
+lT	りぃち	
+lV	りぃぶ	
+lZ	りゃん	
+zq	ざい	
+zt	じつ	
+zg	ぞつ	
+zl	ぞん	
+zb	ざぶ	
+zA	ざら	
+zD	ぜん	
+zH	ずく	
+zI	じき	
+zJ	ずん	
+zK	じん	
+zN	ざん	
+zP	ぞん	
+zQ	ざえ	
+zR	ざら	
+zS	ざる	
+zT	じち	
+zV	じぶ	
+zZ	ざん	
+xq	しゃい	
+xr	しぇつ	
+xt	しつ	
+xf	しゃつ	
+xg	しょつ	
+xl	しょん	
+xx	しゅつ	
+xc	しゅく	
+xb	しゃぶ	
+xA	しゃら	
+xD	しぇん	
+xH	しゅく	
+xI	しき	
+xJ	しゅん	
+xK	しん	
+xN	しゃん	
+xP	しょん	
+xQ	しゃえ	
+xR	しゃら	
+xS	しゃる	
+xT	しち	
+xV	しぶ	
+xZ	しゃん	
+cq	ちゃい	
+cr	ちぇつ	
+ct	ちつ	
+cg	ちょつ	
+cl	ちょん	
+cx	ちゅつ	
+cc	ちゅく	
+cv	ちく	
+cb	ちゃぶ	
+cA	ちゃら	
+cD	ちぇん	
+cH	ちゅく	
+cI	ちき	
+cJ	ちゅん	
+cK	ちん	
+cN	ちゃん	
+cP	ちょん	
+cQ	ちゃえ	
+cR	ちゃら	
+cS	ちゃる	
+cT	ちち	
+cV	ちぶ	
+cZ	ちゃん	
+vq	ゔぁい	
+vr	ゔぇつ	
+vt	ゔぃつ	
+vf	ゔぁつ	
+vg	ゔぉつ	
+vl	ゔぉん	
+vx	ゔつ	
+vc	ゔく	
+vb	ゔぁぶ	
+vA	ゔぁら	
+vD	ゔぇん	
+vH	ゔく	
+vI	ゔぃき	
+vJ	ゔん	
+vK	ゔぃん	
+vN	ゔぁん	
+vP	ゔぉん	
+vQ	ゔぁえ	
+vR	ゔぁら	
+vS	ゔぁる	
+vT	ゔぃち	
+vV	ゔぃぶ	
+vZ	ゔぁん	
+bq	ばい	
+br	べつ	
+bf	ばつ	
+bg	ぼつ	
+bl	ぼん	
+bc	ぶく	
+bb	ばぶ	
+bA	ばら	
+bD	べん	
+bH	ぶく	
+bI	びき	
+bJ	ぶん	
+bK	びん	
+bN	ばん	
+bP	ぼん	
+bQ	ばえ	
+bR	ばら	
+bS	ばる	
+bT	びち	
+bV	びぶ	
+bZ	ばん	
+nq	ない	
+ng	のつ	
+nl	のん	
+nc	ぬく	
+nm	ねき	
+nA	なら	
+nD	ねん	
+nH	ぬく	
+nI	にき	
+nJ	ぬん	
+nK	にん	
+nN	なん	
+nP	のん	
+nQ	なえ	
+nR	なら	
+nS	なる	
+nT	にち	
+nV	にぶ	
+nZ	なん	
+mq	まい	
+mg	もつ	
+ml	もん	
+mc	むく	
+mb	まぶ	
+mA	まら	
+mD	めん	
+mH	むく	
+mI	みき	
+mJ	むん	
+mK	みん	
+mN	まん	
+mP	もん	
+mQ	まえ	
+mR	まら	
+mS	まる	
+mT	みち	
+mV	みぶ	
+mZ	まん	
+A0	おう	
+Aq	あい	
+Aw	えい	
+Ae	え	
+Ar	えつ	
+At	いつ	
+Au	う	
+Ai	い	
+Ao	お	
+Ap	おく	
+Aa	あ	
+As	あく	
+Ad	えん	
+Af	あつ	
+Ag	おつ	
+Ah	うう	
+Aj	うん	
+Ak	いん	
+Al	おん	
+Az	あん	
+Ax	うつ	
+Ac	うく	
+Av	いく	
+Ab	あぶ	
+An	ん	
+Am	えき	
+AA	あら	
+AD	えん	
+AH	うく	
+AI	いき	
+AJ	うん	
+AK	いん	
+AN	あん	
+AP	おん	
+AQ	あえ	
+AR	あら	
+AS	ある	
+AT	いち	
+AV	いぶ	
+AZ	あん	
+F0	ふぉう	
+Fq	ふぁい	
+Fw	ふぇい	
+Fe	ふぇ	
+Fr	ふぇつ	
+Ft	ふぃつ	
+Fu	ふ	
+Fi	ふぃ	
+Fo	ふぉ	
+Fp	ふぉく	
+Fa	ふぁ	
+Fs	ふぁく	
+Fd	ふぇん	
+Ff	ふぁつ	
+Fg	ふぉつ	
+Fh	ふう	
+Fj	ふん	
+Fk	ふぃん	
+Fl	ふぉん	
+Fz	ふぁん	
+Fx	ふつ	
+Fc	ふく	
+Fv	ふぃく	
+Fb	ふぁぶ	
+Fm	ふぇき	
+FA	ふぁら	
+FD	ふぇん	
+FH	ふく	
+FI	ふぃき	
+FJ	ふん	
+FK	ふぃん	
+FN	ふぁん	
+FP	ふぉん	
+FQ	ふぁえ	
+FR	ふぁら	
+FS	ふぁる	
+FT	ふぃち	
+FV	ふぃぶ	
+FZ	ふぁん	
+G0	ぎょう	
+Gq	ぎゃい	
+Gw	ぎぇい	
+Ge	ぎぇ	
+Gr	ぎぇつ	
+Gt	ぎぃつ	
+Gu	ぎゅ	
+Gi	ぎぃ	
+Go	ぎょ	
+Gp	ぎょく	
+Ga	ぎゃ	
+Gs	ぎゃく	
+Gd	ぎぇん	
+Gf	ぎゃつ	
+Gg	ぎょつ	
+Gh	ぎゅう	
+Gj	ぎゅん	
+Gk	ぎぃん	
+Gl	ぎょん	
+Gz	ぎゃん	
+Gx	ぎゅつ	
+Gc	ぎゅく	
+Gv	ぎぃく	
+Gb	ぎゃぶ	
+Gm	ぎぇき	
+GA	ぎゃら	
+GD	ぎぇん	
+GH	ぎゅく	
+GI	ぎぃき	
+GJ	ぎゅん	
+GK	ぎぃん	
+GN	ぎゃん	
+GP	ぎょん	
+GQ	ぎゃえ	
+GR	ぎゃら	
+GS	ぎゃる	
+GT	ぎぃち	
+GV	ぎぃぶ	
+GZ	ぎゃん	
+H0	ひょう	
+Hq	ひゃい	
+Hw	ひぇい	
+He	ひぇ	
+Hr	ひぇつ	
+Ht	ひぃつ	
+Hu	ひゅ	
+Hi	ひぃ	
+Ho	ひょ	
+Hp	ひょく	
+Ha	ひゃ	
+Hs	ひゃく	
+Hd	ひぇん	
+Hf	ひゃつ	
+Hg	ひょつ	
+Hh	ひゅう	
+Hj	ひゅん	
+Hk	ひぃん	
+Hl	ひょん	
+Hz	ひゃん	
+Hx	ひゅつ	
+Hc	ひゅく	
+Hv	ひぃく	
+Hb	ひゃぶ	
+Hm	ひぇき	
+HA	ひゃら	
+HD	ひぇん	
+HH	ひゅく	
+HI	ひぃき	
+HJ	ひゅん	
+HK	ひぃん	
+HN	ひゃん	
+HP	ひょん	
+HQ	ひゃえ	
+HR	ひゃら	
+HS	ひゃる	
+HT	ひぃち	
+HV	ひぃぶ	
+HZ	ひゃん	
+N0	にょう	
+Nq	にゃい	
+Nw	にぇい	
+Ne	にぇ	
+Nr	にぇつ	
+Nt	にぃつ	
+Nu	にゅ	
+Ni	にぃ	
+No	にょ	
+Np	にょく	
+Na	にゃ	
+Ns	にゃく	
+Nd	にぇん	
+Nf	にゃつ	
+Ng	にょつ	
+Nh	にゅう	
+Nj	にゅん	
+Nk	にぃん	
+Nl	にょん	
+Nz	にゃん	
+Nx	にゅつ	
+Nc	にゅく	
+Nv	にぃく	
+Nb	にゃぶ	
+Nm	にぇき	
+NA	にゃら	
+ND	にぇん	
+NH	にゅく	
+NI	にぃき	
+NJ	にゅん	
+NK	にぃん	
+NN	にゃん	
+NP	にょん	
+NQ	にゃえ	
+NR	にゃら	
+NS	にゃる	
+NT	にぃち	
+NV	にぃぶ	
+NZ	にゃん	
+Q0	きょう	
+Qq	きゃい	
+Qw	きぇい	
+Qe	きぇ	
+Qr	きぇつ	
+Qt	きぃつ	
+Qu	きゅ	
+Qi	きぃ	
+Qo	きょ	
+Qp	きょく	
+Qa	きゃ	
+Qs	きゃく	
+Qd	きぇん	
+Qf	きゃつ	
+Qg	きょつ	
+Qh	きゅう	
+Qj	きゅん	
+Qk	きぃん	
+Ql	きょん	
+Qz	きゃん	
+Qx	きゅつ	
+Qc	きゅく	
+Qv	きぃく	
+Qb	きゃぶ	
+Qm	きぇき	
+QA	きゃら	
+QD	きぇん	
+QH	きゅく	
+QI	きぃき	
+QJ	きゅん	
+QK	きぃん	
+QN	きゃん	
+QP	きょん	
+QQ	きゃえ	
+QR	きゃら	
+QS	きゃる	
+QT	きぃち	
+QV	きぃぶ	
+QZ	きゃん	
+R0	ろう	
+Rq	らい	
+Rw	れい	
+Re	れ	
+Rr	れつ	
+Rt	りつ	
+Ru	る	
+Ri	り	
+Ro	ろ	
+Rp	ろく	
+Ra	ら	
+Rs	らく	
+Rd	れん	
+Rf	らつ	
+Rg	ろつ	
+Rh	るう	
+Rj	るん	
+Rk	りん	
+Rl	ろん	
+Rz	らん	
+Rx	るつ	
+Rc	るく	
+Rv	りく	
+Rb	らぶ	
+Rm	れき	
+RA	らら	
+RD	れん	
+RH	るく	
+RI	りき	
+RJ	るん	
+RK	りん	
+RN	らん	
+RP	ろん	
+RQ	らえ	
+RR	らら	
+RS	らる	
+RT	りち	
+RV	りぶ	
+RZ	らん	
+T0	とう	
+Tq	たい	
+Tw	てい	
+Te	て	
+Tr	てつ	
+Tt	ちつ	
+Tu	つ	
+Ti	ち	
+To	と	
+Tp	とく	
+Ta	た	
+Ts	たく	
+Td	てん	
+Tf	たつ	
+Tg	とつ	
+Th	つう	
+Tj	つん	
+Tk	ちん	
+Tl	とん	
+Tz	たん	
+Tx	つつ	
+Tc	つく	
+Tv	ちく	
+Tb	たぶ	
+Tm	てき	
+TA	たら	
+TD	てん	
+TH	つく	
+TI	ちき	
+TJ	つん	
+TK	ちん	
+TN	たん	
+TP	とん	
+TQ	たえ	
+TR	たら	
+TS	たる	
+TT	ちち	
+TV	ちぶ	
+TZ	たん	
+V0	おう	
+Vq	あい	
+Vw	えい	
+Ve	え	
+Vr	えつ	
+Vt	いつ	
+Vu	う	
+Vi	い	
+Vo	お	
+Vp	おく	
+Va	あ	
+Vs	あく	
+Vd	えん	
+Vf	あつ	
+Vg	おつ	
+Vh	うう	
+Vj	うん	
+Vk	いん	
+Vl	おん	
+Vz	あん	
+Vx	うつ	
+Vc	うく	
+Vv	いく	
+Vb	あぶ	
+Vn	ん	
+Vm	えき	
+VA	あら	
+VD	えん	
+VH	うく	
+VI	いき	
+VJ	うん	
+VK	いん	
+VN	あん	
+VP	おん	
+VQ	あえ	
+VR	あら	
+VS	ある	
+VT	いち	
+VV	いぶ	
+VZ	あん	
+mn	もの	
+mst	ました	
+msn	ません	
+msnd	ませんでした	
+dst	でした	
+srr	される	
+tir	ている	
+tim	ています	
+ddn	だけでなく	
+ndn	ので	
+smms	すみません	
+arg	ありがとうございます	
+yrsk	よろしくおねがいします	
+msy	ましょう	
+msyk	ましょうか	
+msk	ますか	
+msnk	ませんか	
+dsk	ですか	
+dsn	ですね	
+dsy	ですよ	
+djnkt	ではなかった	
+djarm	ではありません	
+djarmd	ではありませんでした	
+jni	じゃない	
+jnkt	じゃなかった	
+ndar	のである	
+nds	のです	
+ndesh	んでした	
+smst	しました	
+nrni	ならない	
+xmxt	しました	
+dtd	だったんだ	
+mda	まだ	

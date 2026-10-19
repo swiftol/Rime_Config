@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>ZhongriSettingsV2</RootNamespace>
+    <Platforms>x64</Platforms>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <!-- Keep the preview independent of the machine-wide Windows App Runtime.
+         A user should never have to approve an SDK install to open Settings. -->
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>../zhongri-weasel/resource/weasel.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="../mozc-v2-runtime/romanji-hiragana.tsv" Link="romaji-reference.tsv" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7175" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260804001" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.0" />
+    <Compile Include="../zhongri-settings/SettingsStore.cs" Link="SettingsStore.cs" />
+    <Compile Include="../zhongri-settings/BuiltConfigRefresher.cs" Link="BuiltConfigRefresher.cs" />
+    <Compile Include="../zhongri-settings/ChineseCorrectionStore.cs" Link="ChineseCorrectionStore.cs" />
+    <Compile Include="../zhongri-settings/RimeRuntime.cs" Link="RimeRuntime.cs" />
+    <Compile Include="../zhongri-settings/PhraseStore.cs" Link="PhraseStore.cs" />
+    <Compile Include="../zhongri-settings/PhraseCodeGenerator.cs" Link="PhraseCodeGenerator.cs" />
+    <Compile Include="../zhongri-settings/CustomFuzzyRuleStore.cs" Link="CustomFuzzyRuleStore.cs" />
+    <Content Include="../zhongri-weasel/resource/weasel.ico" Link="zhongri.ico" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

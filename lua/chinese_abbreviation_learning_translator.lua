@@ -2,8 +2,10 @@ local learning = require("chinese_abbreviation_learning")
 local routing = require("mozc_v2_translator")
 local q_completion = require("chinese_q_prefix_completion")
 local MARKER = "[[RIME_LANG:ZH]]"
+local hot_correction = require("chinese_hot_correction")
 
 local function translator(input, seg, env)
+  hot_correction.translate(input, seg, env)
   local normalized = (input or ""):lower():gsub("[%s']+", "")
   local seen = {}
   -- One-letter learning is applied inside the final mixed-order filter by

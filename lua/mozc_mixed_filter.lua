@@ -48,6 +48,11 @@ local function yield_remembered(code, candidates, context)
 end
 
 function M.func(input, env)
+  local generation=env.engine.context:get_property('chinese_correction_generation') or ''
+  if env.hot_settings_generation~=generation then
+    env.hot_settings_generation=generation
+    nonempty_frames,nonempty_order={},{}
+  end
   if env.engine.context:get_option("japanese_input_table_enabled") then
     for cand in input:iter() do yield(cand) end
     return
