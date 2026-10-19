@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [master]
-    paths: ['release/**', 'docs/releases/v2.1.0.md']
+    paths: ['release/**']
 permissions:
   contents: write
 concurrency:

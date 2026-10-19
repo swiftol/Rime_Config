@@ -1,0 +1,44 @@
+name: Update release notes
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths: ['docs/releases/v2.1.0.md']
+permissions:
+  contents: write
+concurrency:
+  group: publish-windows-release
+  cancel-in-progress: false
+jobs:
+  notes:
+    runs-on: windows-2022
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update announcement without changing downloads
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $api = 'repos/swiftol/Rime_Config/releases/tags/v2.1.0'
+          $before = gh api $api | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or $before.draft) { throw 'Published release required' }
+          $assetsBefore = $before.assets | Select-Object id,name,size,digest | ConvertTo-Json -Compress
+          $tagBefore = gh api repos/swiftol/Rime_Config/git/ref/tags/v2.1.0 | Out-String
+          if ($LASTEXITCODE -ne 0) { throw 'Tag lookup failed' }
+          $installer = @($before.assets | Where-Object name -eq 'ZhongriInputMethod-2.1.0-Setup.exe')
+          if ($installer.Count -ne 1 -or $installer[0].digest -notmatch '^sha256:([a-fA-F0-9]{64})$') { throw 'Installer digest missing' }
+          $digest = $Matches[1].ToUpperInvariant()
+          $body = Get-Content docs/releases/v2.1.0.md -Raw -Encoding utf8
+          $notes = Join-Path $env:RUNNER_TEMP 'release-notes.md'
+          ($body.TrimEnd() + "`n`n安装包 SHA-256：``$digest`` `n") | Set-Content $notes -Encoding utf8
+          gh release edit v2.1.0 --repo swiftol/Rime_Config --notes-file $notes
+          if ($LASTEXITCODE -ne 0) { throw 'Notes update failed' }
+          $after = gh api $api | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw 'Release verification failed' }
+          $assetsAfter = $after.assets | Select-Object id,name,size,digest | ConvertTo-Json -Compress
+          $tagAfter = gh api repos/swiftol/Rime_Config/git/ref/tags/v2.1.0 | Out-String
+          if ($LASTEXITCODE -ne 0 -or $tagBefore -cne $tagAfter -or $assetsBefore -cne $assetsAfter) { throw 'Release downloads or tag changed' }
+          if ($after.body.TrimEnd() -cne (Get-Content $notes -Raw -Encoding utf8).TrimEnd()) { throw 'Published text mismatch' }
+          'Release notes updated; downloads and tag unchanged.'
